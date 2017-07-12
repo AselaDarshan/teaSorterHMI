@@ -321,7 +321,7 @@ public class Window3 {
 							panel5.add(imgLabel, BorderLayout.PAGE_START);
 							panel5.validate();
 							panel5.repaint();
-							while (System.currentTimeMillis() < startTime + (2 * 60000))
+							while (System.currentTimeMillis() < startTime + (1 * 60000))
 								;
 
 							panel5.remove(imgLabel);

@@ -8,43 +8,46 @@ import java.nio.file.Paths;
 import javax.imageio.ImageIO;
 
 public class FileHandler {
-	public static void convertToRGB(int width, int height, String folder) {
-		System.out.println("inside convert method");
-
+	
+	public static void saveAllAsGif(int width, int height, String folder) {
+		System.out.println("saving as gif..");
 		BufferedImage currentImage;
 	     final File dir = new File(folder);
 		File[] list = dir.listFiles();
-		// System.out.println(list.length);
-		BufferedImage m;
-		String fileName = null;
+		
+		String outPutFolder = null;
 		
 		if(folder=="stemRowData")
 		{
-			fileName="testInStem";
+			outPutFolder="testInStem";
 			
 		}
 		if(folder=="leafRowData")
 		{
-			fileName="testInLeaf";
+			outPutFolder="testInLeaf";
 		}
-		new File(fileName).mkdir();
+		else outPutFolder = folder+"/gif";
+		
+		new File(outPutFolder).mkdir();
+		
 		for (int inc = 0; inc < list.length; inc++) {
-			String name = dir.getName() + "/" + list[inc].getName();
-			ImageReader ryuv = new ImageReader(width, height);
-//			ryuv.startReading(name);
-			currentImage = ryuv.getBufferedImage24bit(name);
+			String filename = dir.getName() + "/" + list[inc].getName();
+			ImageReader imageReader = new ImageReader(width, height);
+
+			currentImage = imageReader.getBufferedImage24bit(filename);
 			
-			String path = fileName+"/" + list[inc].getName().split("[.]")[0]+".gif" ;
+			String path = outPutFolder+"/" + list[inc].getName().split("[.]")[0]+".gif" ;
 			try {
 
 				ImageIO.write(currentImage, "GIF", new File(path));
+				
 			} catch (IOException e) {
 
 				e.printStackTrace();
 			}
 
 		}
-
+		System.out.println("Completed!");
 	}
 	
 	public static void saveAsGIF(int width,int height,String path){

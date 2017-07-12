@@ -1,14 +1,10 @@
 package com.Sortex.controller;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.nio.IntBuffer;
+
 import java.awt.image.*;
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
+
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
-import javax.imageio.ImageIO;
 
 import java.nio.file.Path;
 
@@ -34,7 +30,7 @@ public class ImageReader {
 			byte[] rawData8bit = new byte[width*height*3];
 			
 			//convert to 24bit RGB
-			for(int i=0;i<width*height*6;i+=2){
+			for(int i=0;i<rawData.length;i+=2){
 				//copy MSB
 				rawData8bit[i/2] = rawData[i+1];
 			}

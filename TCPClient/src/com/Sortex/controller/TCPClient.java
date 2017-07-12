@@ -6,8 +6,8 @@ import java.util.Timer;
 
 public class TCPClient {
 	final static int NUMBER_OF_BYTES_PER_PACKET = 61440;
-	final static int NUMBER_OF_BYTES_PER_LINE = 2560;
-	final static int NUMBER_OF_LINES_PER_FRAME = 240;
+	final static int NUMBER_OF_BYTES_PER_LINE = 7680;// 6 bytes
+	final static int NUMBER_OF_LINES_PER_FRAME = 1024;
 	final static int NUMBER_OF_BYTES_PER_FRAME = NUMBER_OF_BYTES_PER_LINE * NUMBER_OF_LINES_PER_FRAME;
 	public static int NUMBER_OF_FRAMES;
 	final static int HEADER_VALUE1 = 192;
@@ -87,7 +87,7 @@ public class TCPClient {
 		paramBuffer[0] = toByte(sensitivityValue);
 		paramBuffer[3] = toByte(HEADER_SENSITIVITY_VALUE);
 		outToServer.write(paramBuffer);
-		
+
 		paramBuffer[1] = toByte(0);
 		paramBuffer[2] = toByte(0);
 		paramBuffer[0] = toByte(sensitivityValue);
@@ -104,9 +104,9 @@ public class TCPClient {
 
 	// note :main method changed as train()
 	public static void train(String folderName) throws UnknownHostException, IOException {
-		
-		FileHandler.saveAsGIF(1280, 1024, "out.bin");
-		
+
+		// FileHandler.saveAsGIF(1280, 1024, "out.bin");
+		FileHandler.saveAllAsGif(1280, NUMBER_OF_LINES_PER_FRAME, "testInLeaf");
 		buildServerConnection();
 		byte[] _32bitframe = new byte[4];
 		for (byte b1 : _32bitframe) {
@@ -161,7 +161,7 @@ public class TCPClient {
 		System.out.println("frame received,fps:" + NUMBER_OF_FRAMES / (estimatedTime / 1000000000.0) + " time: "
 				+ estimatedTime / 1000000 + "ms");
 
-		FileHandler.convertToRGB(1280, NUMBER_OF_LINES_PER_FRAME, folderName);
+		FileHandler.saveAllAsGif(1280, NUMBER_OF_LINES_PER_FRAME, folderName);
 		clientSocket.close();
 
 		System.out.println("Converting Succefull");
