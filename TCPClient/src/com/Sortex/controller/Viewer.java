@@ -20,13 +20,14 @@ import javax.swing.JLabel;
 
 public class Viewer {
 
-	final static JFrame frame = new JFrame();
-	private static ImageIcon icon;
-	private static JLabel label;
+	private JFrame frame = new JFrame();
+	private  ImageIcon icon;
+	private  JLabel label;
 
-	public static void initialize() {
+	public  void initialize() {
 
 		frame.getContentPane().setLayout(new FlowLayout());
+		frame.setLocation(350, 310);
 
 		icon = new ImageIcon();
 		label = new JLabel();
@@ -36,7 +37,7 @@ public class Viewer {
 		frame.setVisible(true);
 	}
 
-	public static void updateFrame() throws IOException {
+	public void updateFrame() throws IOException {
 		Queue<String> imageList = new LinkedList<String>();
 
 		Files.walk(Paths.get("OutputImages")).forEach(filePath -> {
@@ -54,16 +55,18 @@ public class Viewer {
 
 	}
 
-	public static void visibleImage(BufferedImage image) {
+	public void visibleImage(BufferedImage image) {
 
 		icon.setImage(image);
-		frame.pack();
-		frame.setVisible(true);
+//		frame.pack();
+//		frame.setVisible(true);
 		// label.setIcon(icon);
 		frame.pack();
 		frame.setVisible(true);
 		frame.repaint();
 
 	}
-
+	public void close() {
+		frame.dispose();
+	}
 }

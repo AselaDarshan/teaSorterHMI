@@ -24,5 +24,9 @@ public class FrameBuffer {
 		}
 		
 	}
+	
+	public static void clearBuffer(){
+		buffer = new LinkedList<byte[]>();
+	}
 
 }

@@ -57,13 +57,31 @@ public class Window2 {
 
 	public JPanel init() {
 
-		sliderR = getSlider(0, 255, 0, 50, 5);
+		sliderR = getSlider(0, 1024, 0, 100, 5);
 		sliderG = getSlider(0, 255, 0, 50, 5);
 		sliderB = getSlider(0, 255, 0, 50, 5);
-		sliderRX = getSlider(0, 255, 0, 50, 5);
+		sliderRX = getSlider(0, 1024, 0, 100, 5);
 		sliderGX = getSlider(0, 255, 0, 50, 5);
 		sliderBX = getSlider(0, 255, 0, 50, 5);
 		sensitivitySlider = getSlider(0, 100, 50, 10, 5);
+		
+		sliderB.setVisible(false);
+		sliderG.setVisible(false);
+		sliderBX.setVisible(false);
+		sliderGX.setVisible(false);
+		
+		labelGreen.setVisible(false);
+		labelBlue.setVisible(false);
+		labelBlueX.setVisible(false);
+		labelGreenX.setVisible(false);
+		
+		 labelGreenValue.setVisible(false);
+		 labelBlueValue.setVisible(false);
+	
+		 labelGreenValueX.setVisible(false);
+		 labelBlueValueX.setVisible(false);
+		//sliderB.setVisible(false);
+		
 		container = new JPanel();
 		container.setLayout(new GridBagLayout());
 
@@ -90,15 +108,9 @@ public class Window2 {
 			@Override
 			public void stateChanged(ChangeEvent arg0) {
 				sensitivityValue=sensitivitySlider.getValue();
-				try {
+				
 					com.Sortex.controller.TCPClient.sendSensitivityParams(sensitivityValue);
-				} catch (UnknownHostException e) {
-					
-					e.printStackTrace();
-				} catch (IOException e) {
-					
-					e.printStackTrace();
-				}
+				
 				
 			}
 		});
@@ -239,7 +251,7 @@ public class Window2 {
 				blueValueX = slider.getValue();
 			}
 
-			try {
+			
 				if(slider== sliderR || slider== sliderG || slider == sliderB){
 					
 					com.Sortex.controller.TCPClient.sendBackgroundColorParameters(redValue, greenValue, blueValue);
@@ -250,13 +262,7 @@ public class Window2 {
 					com.Sortex.controller.TCPClient.sendStemLeafTresholds(redValueX, greenValueX, blueValueX);
 				}
 
-			} catch (UnknownHostException e1) {
-
-				e1.printStackTrace();
-			} catch (IOException e1) {
-
-				e1.printStackTrace();
-			}
+			
 
 		}
 

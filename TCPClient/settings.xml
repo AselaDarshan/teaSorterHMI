@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+<comment/>
+<entry key="margin_24">0</entry>
+<entry key="margin_23">0</entry>
+<entry key="margin_22">0</entry>
+<entry key="margin_21">0</entry>
+<entry key="margin_20">0</entry>
+<entry key="min_stem_count">405</entry>
+<entry key="margin_9">0</entry>
+<entry key="margin_8">0</entry>
+<entry key="margin_7">0</entry>
+<entry key="margin_6">0</entry>
+<entry key="y_end">625</entry>
+<entry key="margin_5">0</entry>
+<entry key="margin_4">0</entry>
+<entry key="margin_3">0</entry>
+<entry key="margin_2">0</entry>
+<entry key="delay_steps">1</entry>
+<entry key="margin_1">720</entry>
+<entry key="margin_0">590</entry>
+<entry key="margin_19">0</entry>
+<entry key="margin_18">0</entry>
+<entry key="margin_17">0</entry>
+<entry key="delay_granualty">800005</entry>
+<entry key="margin_16">0</entry>
+<entry key="margin_15">0</entry>
+<entry key="margin_14">0</entry>
+<entry key="margin_13">0</entry>
+<entry key="margin_12">0</entry>
+<entry key="margin_11">0</entry>
+<entry key="margin_10">0</entry>
+<entry key="certaintity">54</entry>
+<entry key="tcp_timeout_ms">1000</entry>
+<entry key="bg_threshold">0</entry>
+<entry key="ejector_on_steps">1</entry>
+<entry key="y_start">526</entry>
+<entry key="sl_threshold">0</entry>
+<entry key="mux">1</entry>
+</properties>

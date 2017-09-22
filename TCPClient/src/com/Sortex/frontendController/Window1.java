@@ -7,6 +7,8 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.IOException;
 import java.net.UnknownHostException;
 
@@ -21,6 +23,9 @@ import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+
+import com.Sortex.controller.Constants;
+import com.Sortex.controller.SettingsManager;
 
 public class Window1 {
 
@@ -39,7 +44,7 @@ public class Window1 {
 
 	public void init() {
 		mainPanel = new JPanel();
-		frame = new JFrame("Sorter");
+		frame = new JFrame("SORTEX");
 		frame.setResizable(false);
 		jtp = new JTabbedPane();
 		frame.getContentPane().add(jtp);
@@ -55,10 +60,14 @@ public class Window1 {
 	public static void main(String[] args) {
 		try {
 			UIManager.setLookAndFeel("com.jtattoo.plaf.noire.NoireLookAndFeel");
-			UIManager.put("Button.font", new Font("Arial", Font.BOLD, 25));
-			UIManager.put("Label.font", new Font("Arial", Font.BOLD, 12));
-			UIManager.put("RadioButton.font", new Font("Arial", Font.BOLD, 18));
-			UIManager.put("ComboBox.font", new Font("Arial", Font.BOLD, 18));
+			UIManager.put("Button.font", new Font("Arial", Font.BOLD, Constants.BUTTON_FONT_SIZE));
+			UIManager.put("Label.font",new Font("Arial", Font.BOLD, Constants.TITLE_FONT_SIZE));
+			UIManager.put("RadioButton.font", new Font("Arial", Font.BOLD, Constants.VALUE_FONT_SIZE));
+			UIManager.put("ComboBox.font", new Font("Arial", Font.BOLD, Constants.VALUE_FONT_SIZE));
+			UIManager.put("Spinner.font", new Font("Arial", Font.BOLD, 25));
+			UIManager.put("Slider.font", new Font("Arial", Font.BOLD, Constants.SLIDER_VALUE_FONT_SIZE));
+		//	UIManager.put("TextField.font", new Font("Arial", Font.BOLD, Constants.SLIDER_VALUE_FONT_SIZE));
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -74,11 +83,15 @@ public class Window1 {
 	public void makeUI() {
 
 		panel2 = window2.init();
-		panel4 = window3.createTestPanel();
+		SettingsManager settingsManger = new SettingsManager();
+		panel4 = window3.createTestPanel(settingsManger);
+		
+		
+		window3.setValues(settingsManger);
 		frame.setSize(800, 480);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		jtp.addTab("Auto Thresholding", panel4);
-		jtp.addTab("Manual Thresholding", panel2);
+		jtp.addTab("Settings", panel4);
+		jtp.addTab("Statistics", panel2);
 		frame.setVisible(true);
 		jtp.addChangeListener(new ChangeListener() {
 
@@ -87,17 +100,19 @@ public class Window1 {
 				selectedIndex = jtp.getSelectedIndex();
 				System.out.println("You are in tab : " + selectedIndex);
 
-				try {
-					com.Sortex.controller.TCPClient.controlMonitor(selectedIndex);
-				} catch (UnknownHostException e1) {
-					
-					e1.printStackTrace();
-				} catch (IOException e1) {
-					
-					e1.printStackTrace();
-				}
+				
+			
 			}
 		});
+		
+
+		frame.addWindowListener(new WindowAdapter(){
+		                public void windowClosing(WindowEvent e){
+		                	System.out.println("Closing application..");
+		                    settingsManger.saveSettings();
+		                    System.out.println("settings saved");
+		                }
+		            });
 
 	}
 
