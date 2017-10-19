@@ -609,9 +609,9 @@ public class Window3 {
 		
 		JLabel delayLable = new JLabel("Granualty");
 		delayLable.setFont(new Font("Arial", Font.BOLD, Constants.TITLE_FONT_SIZE));
-		JLabel ejectDurationLabel = new JLabel("Ejector on Steps");
+		JLabel ejectDurationLabel = new JLabel("On Steps");
 		ejectDurationLabel.setFont(new Font("Arial", Font.BOLD, Constants.TITLE_FONT_SIZE));
-		JLabel delayStepsLabel = new JLabel("Eject delay Steps");
+		JLabel delayStepsLabel = new JLabel("Delay Steps");
 		delayStepsLabel.setFont(new Font("Arial", Font.BOLD, Constants.TITLE_FONT_SIZE));
 		
 		delayGranulatySpinner = new JSpinner();
@@ -622,6 +622,30 @@ public class Window3 {
 		
 		delayStepsSpinner = new JSpinner();
 		delayStepsSpinner.setFont(new Font("Arial", Font.BOLD, Constants.VALUE_FONT_SIZE));
+		
+		JPanel delayTextPanel = new JPanel(new GridBagLayout());
+		JLabel delayTimeLabel = new JLabel("Delay(us)");
+		JLabel onTimeLabel = new JLabel("On Time(us)");
+		
+		JTextField delayTime = new JTextField();
+		delayTime.setFont(new Font("Arial", Font.BOLD, Constants.NON_EDITABLE_VALUE_FONT_SIZE));
+		delayTime.setEditable(false);
+		JTextField onTime = new JTextField();
+		onTime.setFont(new Font("Arial", Font.BOLD, Constants.NON_EDITABLE_VALUE_FONT_SIZE));
+		onTime.setEditable(false);
+		
+		delayTextPanel.add(delayTimeLabel,new GridBagConstraints(0, 0, 1, 1, 0.05, 0.1, GridBagConstraints.CENTER,
+				GridBagConstraints.BOTH, new Insets(2, 2, 2, 2), 0, 0));
+		delayTextPanel.add(delayTime,new GridBagConstraints(1, 0, 1, 1, 0.05, 0.1, GridBagConstraints.CENTER,
+				GridBagConstraints.BOTH, new Insets(2, 2, 2, 2), 0, 0));
+		
+		delayTextPanel.add(onTimeLabel,new GridBagConstraints(0, 1, 1, 1, 0.05, 0.1, GridBagConstraints.CENTER,
+				GridBagConstraints.BOTH, new Insets(2, 2, 2, 2), 0, 0));
+		
+		delayTextPanel.add(onTime,new GridBagConstraints(1, 1, 1, 1, 0.05, 0.1, GridBagConstraints.CENTER,
+				GridBagConstraints.BOTH, new Insets(2, 2, 2, 2), 0, 0));
+		
+		
 		
 		delaySettingPanel.add(delayLable,new GridBagConstraints(3, 0, 1, 1, 0.05, 0.1, GridBagConstraints.CENTER,
 				GridBagConstraints.BOTH, new Insets(2, 2, 2, 2), 0, 0));
@@ -638,15 +662,22 @@ public class Window3 {
 		delaySettingPanel.add(ejectDurationSpinner,new GridBagConstraints(8, 0, 1, 1, 0.3, 0.1, GridBagConstraints.EAST,
 				GridBagConstraints.BOTH, new Insets(2, 2, 2, 2), 0, 0));
 		
+		delaySettingPanel.add(delayTextPanel,new GridBagConstraints(9, 0, 1, 1, 0.3, 0.1, GridBagConstraints.EAST,
+				GridBagConstraints.BOTH, new Insets(2, 2, 2, 2), 0, 0));
+		
 		delayGranulatySpinner.addChangeListener(new ChangeListener() {
 
 	        @Override
 	        public void stateChanged(ChangeEvent e) {
 	            
 //	            System.out.println(delayGranulatySpinner.getValue());
-	          
+	        		
 	        		settingsManager.setDelayGranularity((int)delayGranulatySpinner.getValue());
-					
+					int delay = settingsManager.getDelayGranularity()*settingsManager.getEjectDelaySteps()*2*10/1000;
+	        		delayTime.setText(Integer.toString(delay));
+	        		
+	        		int onTimeValue = settingsManager.getDelayGranularity()*settingsManager.getEjectorOndelaySteps()*2*10/1000;
+	        		onTime.setText(Integer.toString(onTimeValue));
 				
 	        }
 	    });
@@ -659,6 +690,8 @@ public class Window3 {
 	            
 //	            System.out.println(delayGranulatySpinner.getValue());
 	        		settingsManager.setEjectDelaySteps((int)delayStepsSpinner.getValue());
+	        		int delay = settingsManager.getDelayGranularity()*settingsManager.getEjectDelaySteps()*2*10/1000;
+	        		delayTime.setText(Integer.toString(delay));
 //					com.Sortex.controller.TCPClient.sendDelaySteps();
 				
 	        }
@@ -671,6 +704,8 @@ public class Window3 {
 	            
 //	            System.out.println(delayGranulatySpinner.getValue());
 	        		settingsManager.setEjectorOndelaySteps((int)ejectDurationSpinner.getValue());
+	        		int onTimeValue = settingsManager.getDelayGranularity()*settingsManager.getEjectorOndelaySteps()*2*10/1000;
+	        		onTime.setText(Integer.toString(onTimeValue));
 //					com.Sortex.controller.TCPClient.sendEjectOnSteps();
 				
 	        }
@@ -931,28 +966,43 @@ public class Window3 {
 		container.add(panel5, new GridBagConstraints(1, 5, 1, 1, 0.2, 1, GridBagConstraints.WEST, GridBagConstraints.BOTH,new Insets(2, 2, 2, 2), 0, 0));
 		container.add(panel4, new GridBagConstraints(0, 5, 1, 1, 4, 1, GridBagConstraints.WEST, GridBagConstraints.BOTH,new Insets(2, 2, 2, 2), 0, 0));
 		
-		
+		try {
 		backgroundThresholdSlider.setValue(settingsManager.getBgThrshold());
+		Thread.sleep(5);
 		stemLeafThresholdSlider.setValue(settingsManager.getStemLeafThreshold());
+		Thread.sleep(5);
 		sensitivitySlider.setValue(settingsManager.getCertantity());
+		Thread.sleep(5);
 		minCountSpinner.setValue(settingsManager.getMinStemCount());
+		Thread.sleep(5);
 		delayGranulatySpinner.setValue(settingsManager.getDelayGranularity());
+		Thread.sleep(5);
 		delayStepsSpinner.setValue(settingsManager.getEjectDelaySteps());
+		Thread.sleep(5);
 		ejectDurationSpinner.setValue(settingsManager.getEjectorOndelaySteps());
+		Thread.sleep(5);
 		//roiXStartSpinner.setValue(settingsManager.getRoiXStart());
 		//roiXEndSpinner.setValue(settingsManager.getRoiXEnd());
 
 		roiYStartSpinner.setValue(settingsManager.getRoiYStart());
+		Thread.sleep(5);
 		roiYEndSpinner.setValue(settingsManager.getRoiYEnd());
+		Thread.sleep(5);
 		muxSpinner.setValue(settingsManager.getMux());
+		Thread.sleep(5);
 		
 		marginValueArray = settingsManager.getMarginsArray();
+		Thread.sleep(5);
 		for(int i=Constants.NUMBER_OF_MARGINS-1;i>=0;i--){
 			marginIdSelector.setSelectedIndex(i);
 			marginSpinner.setValue(marginValueArray[i]);
+			Thread.sleep(5);
 		}
 		
-		
+		} catch (InterruptedException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 		return container;
 	}
 

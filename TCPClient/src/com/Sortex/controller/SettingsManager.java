@@ -288,6 +288,11 @@ public class SettingsManager {
 		com.Sortex.controller.TCPClient.sendDelaySteps(ejectDelaySteps);
 		com.Sortex.controller.TCPClient.sendEjectOnSteps(ejectorOndelaySteps);
 		com.Sortex.controller.TCPClient.sendMux(mux);
+		
+		for(int i=Constants.NUMBER_OF_MARGINS-1;i>=0;i--){
+				com.Sortex.controller.TCPClient.sendMargin(i,marginsArray[i]);
+				
+		}
 	}
 	
 	public void retriveSettingsFromCamera(){

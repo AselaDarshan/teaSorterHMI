@@ -280,6 +280,12 @@ public class TCPClient {
 			}
     	});
 		t.start();
+		try {
+			Thread.sleep(10);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	private static void sendDataToCameraThread(byte[] paramBuffer){
@@ -461,27 +467,27 @@ public class TCPClient {
 					try{
 						// System.out.println("reading : "+(bytesPerPacket-bytesRecived));
 						int waitingTime = 0;
-						try{
-						while(dis.available()<bytefPerNextPacket){
-							try {
-								Thread.sleep(1);
-								waitingTime++;
-								if(waitingTime>timeout){  
-									train(folderName,timeout);
-									return;
-								}
-								
-							} catch (InterruptedException e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
-							}
-							
-						}
-						}catch (java.io.IOException e) {
-							train(folderName,timeout);
-							return;
-							// TODO: handle exception
-						}
+//						try{
+//						while(dis.available()<bytefPerNextPacket){
+//							try {
+//								Thread.sleep(1);
+//								waitingTime++;
+//								if(waitingTime>timeout){  
+//									train(folderName,timeout);
+//									return;
+//								}
+//								
+//							} catch (InterruptedException e) {
+//								// TODO Auto-generated catch block
+//								e.printStackTrace();
+//							}
+//							
+//						}
+//						}catch (java.io.IOException e) {
+//							train(folderName,timeout);
+//							return;
+//							// TODO: handle exception
+//						}
 						bytesRead = dis.read(byteBuf, frameByteCount,bytefPerNextPacket-bytesRecived);
 					}
 					catch(java.lang.ArrayIndexOutOfBoundsException e){
@@ -501,7 +507,7 @@ public class TCPClient {
 				}
 
 			}
-
+//			System.out.println("pc: "+Byte.toUnsignedInt(byteBuf[bytesPerFrame-4])+" "+Byte.t oUnsignedInt(byteBuf[bytesPerFrame-3])+" "+Byte.toUnsignedInt(byteBuf[bytesPerFrame-2])+" "+Byte.toUnsignedInt(byteBuf[bytesPerFrame-1]));
 			FrameBuffer.addToBuffer(byteBuf);
 
 		}

@@ -4,6 +4,7 @@ public class Constants {
 	public final static int TITLE_FONT_SIZE = 16;
 	public final static int PANEL_TITLE_FONT_SIZE = 12;
 	public final static int VALUE_FONT_SIZE = 20;
+	public final static int NON_EDITABLE_VALUE_FONT_SIZE = 16;
 	public final static int TEXT_FEILD_FONT_SIZE = 16;
 	public final static int SLIDER_VALUE_FONT_SIZE = 12;
 	public final static int BUTTON_FONT_SIZE = 20;
