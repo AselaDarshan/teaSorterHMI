@@ -18,7 +18,7 @@ public class TCPClient {
 	final static int NUMBER_OF_BYTES_PER_LINE = 100*4;// 6 bytes
 	final static int NUMBER_OF_LINES_PER_FRAME = 100;
 	final static int NUMBER_OF_BYTES_PER_FRAME = NUMBER_OF_BYTES_PER_LINE * NUMBER_OF_LINES_PER_FRAME;
-	public static int NUMBER_OF_FRAMES;
+//	public static int numberOfFrames;
 	final static int HEADER_BACKGORUND_THRESHOLD = 0x0F;
 	final static int HEADER_STEM_LEAF_THRESHOLD = 0x10;
 	final static int HEADER_MONITOR_ON = 160;
@@ -46,25 +46,29 @@ public class TCPClient {
 	
 	
 	public static boolean tcpReceive;
-
+	public static boolean isSendDataEnabled = true;
+	
 	public static boolean buildServerConnection()  {
-			//return false;
-		try {
-			clientSocket = new Socket("10.0.1.1", 7000);
-//			clientSocket = new Socket("192.168.1.12", 7000);
 		
-			outToServer = new DataOutputStream(clientSocket.getOutputStream());
-		
-			in = clientSocket.getInputStream();
-		} catch (IOException e) {
+				//return false;
+			try {
+				clientSocket = new Socket("10.0.1.1", 7000);
+	//			clientSocket = new Socket("192.168.1.12", 7000);
 			
-			JOptionPane.showMessageDialog(null , "Not Connected!");
-			e.printStackTrace();
-			return false;
-		}
-		dis = new DataInputStream(in);
-		System.out.println("Connected to server");
-		return true;
+				outToServer = new DataOutputStream(clientSocket.getOutputStream());
+			
+				in = clientSocket.getInputStream();
+			} catch (IOException e) {
+				
+				JOptionPane.showMessageDialog(null , "Not Connected!");
+				e.printStackTrace();
+				return false;
+			}
+			dis = new DataInputStream(in);
+			System.out.println("Connected to server");
+			return true;
+		
+		
 	}
 
 	public static void sendStemLeafTresholds(int param1, int param2, int param3) {
@@ -289,6 +293,7 @@ public class TCPClient {
 	}
 	
 	private static void sendDataToCameraThread(byte[] paramBuffer){
+		if(isSendDataEnabled){
 		Thread t = null;
 		
 		 JOptionPane opt = new JOptionPane("Connection establishment failed. \nRetrying...", JOptionPane.ERROR_MESSAGE, JOptionPane.DEFAULT_OPTION, null, new Object[]{}); // no buttons
@@ -346,6 +351,7 @@ public class TCPClient {
 				
 			}
 		}while(isRetringMessageShowing&&!retryingCancelled);
+		}
 	}
 	
 	private static byte[] getDataFromCamera(byte[] paramBuffer,int numberOfBytes){
@@ -383,8 +389,7 @@ public class TCPClient {
 	}
 	
 	
-	// note :main method changed as train()
-	public static void train(String folderName,int timeout) throws IOException   {
+	public static void getFrames(String folderName,int timeout, int numberOfFrames) throws IOException   {
 
 		// FileHandler.saveAsGIF(1280, 1024, "out.bin");
 //		FileHandler.saveAllAsGif(1280, NUMBER_OF_LINES_PER_FRAME, "testInLeaf");
@@ -423,13 +428,13 @@ public class TCPClient {
 		FrameBuffer.clearBuffer();
 		// ... the code being measured ...
 
-		Controller.start(NUMBER_OF_FRAMES, folderName,width,height);
+		Controller.start(numberOfFrames, folderName,width,height);
 		Thread.currentThread().setPriority(Thread.MAX_PRIORITY);
 		tcpReceive = true;
 		
 		buildServerConnection();
 		// get 1000 frames
-		for (int i = 0; (i < NUMBER_OF_FRAMES||NUMBER_OF_FRAMES==-1)&&tcpReceive; i++) {
+		for (int i = 0; (i < numberOfFrames||numberOfFrames==-1)&&tcpReceive; i++) {
 			// long start = System.nanoTime();
 			frameByteCount = 0;
 			bytesRecived = 0;
@@ -449,7 +454,7 @@ public class TCPClient {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
-					train(folderName,timeout);
+					getFrames(folderName,timeout,numberOfFrames);
 					return;
 				}
 				// frameNumber = dis.readInt();
@@ -514,7 +519,7 @@ public class TCPClient {
 
 		long estimatedTime = System.nanoTime() - startTime;
 
-		System.out.println("frame received,fps:" + NUMBER_OF_FRAMES / (estimatedTime / 1000000000.0) + " time: "
+		System.out.println("frame received,fps:" + numberOfFrames / (estimatedTime / 1000000000.0) + " time: "
 				+ estimatedTime / 1000000 + "ms");
 
 		//FileHandler.saveAllAsGif(1280, NUMBER_OF_LINES_PER_FRAME, folderName);

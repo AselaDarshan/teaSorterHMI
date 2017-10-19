@@ -8,6 +8,7 @@ public class Constants {
 	public final static int TEXT_FEILD_FONT_SIZE = 16;
 	public final static int SLIDER_VALUE_FONT_SIZE = 12;
 	public final static int BUTTON_FONT_SIZE = 20;
+	public final static int  SMALL_BUTTON_FONT_SIZE = 12;
 	
 	public final static int DEFAULT_IMAGE_WIDTH = 100;
 	public final static int DEFAULT_IMAGE_HEIGHT = 100;

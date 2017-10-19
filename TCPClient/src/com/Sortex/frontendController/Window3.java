@@ -118,6 +118,8 @@ public class Window3 {
 	private  JTextField  sensitivityValueLabel;
 
 	private int tcpTimeout;
+
+	private JButton autoMarginButton;
 	
 	public JPanel createTestPanel(SettingsManager settingsManager) {
 		
@@ -298,6 +300,9 @@ public class Window3 {
 		muxSpinner = new JSpinner();
 		muxSpinner.setFont(new Font("Arial", Font.BOLD, Constants.VALUE_FONT_SIZE));
 		
+		autoMarginButton = new JButton("Auto Detect Margins");
+		autoMarginButton.setFont(new Font("Arial", Font.BOLD, Constants.SMALL_BUTTON_FONT_SIZE));
+		
 		cameraSettingPanel.add(roiXStartLabel, new GridBagConstraints(0, 0, 1, 1, 0.02, 0.1, GridBagConstraints.WEST,
 				GridBagConstraints.BOTH, new Insets(2, 6, 2, 2), 0, 0));
 		cameraSettingPanel.add(roiXStartSpinner, new GridBagConstraints(1, 0, 1, 1, 0.2, 0.1, GridBagConstraints.EAST,
@@ -325,7 +330,9 @@ public class Window3 {
 		cameraSettingPanel.add(marginSpinner, new GridBagConstraints(6, 0,1, 1, 0.1, 0.1, GridBagConstraints.WEST,
 				GridBagConstraints.BOTH, new Insets(2, 2, 2, 2), 0, 0));
 		
-		cameraSettingPanel.add(muxLabel, new GridBagConstraints(4, 1,1, 1, 0.01, 0.1, GridBagConstraints.WEST,
+		cameraSettingPanel.add(autoMarginButton, new GridBagConstraints(4, 1,1, 1, 0.01, 0.1, GridBagConstraints.WEST,
+				GridBagConstraints.BOTH, new Insets(2, 40, 2, 2), 0, 0));
+		cameraSettingPanel.add(muxLabel, new GridBagConstraints(5, 1,1, 1, 0.01, 0.1, GridBagConstraints.WEST,
 				GridBagConstraints.BOTH, new Insets(2, 40, 2, 2), 0, 0));
 		cameraSettingPanel.add(muxSpinner, new GridBagConstraints(6, 1,1, 1, 0.1, 0.1, GridBagConstraints.WEST,
 				GridBagConstraints.BOTH, new Insets(2, 2, 2, 2), 0, 0));
@@ -396,7 +403,7 @@ public class Window3 {
 	           
 	        }
 	    });
-		/*****************************************************************************/
+		/*********************end *******************************************************/
 		// add radio buttons
 		JRadioButton stem = new JRadioButton("Stem");
 
@@ -733,9 +740,9 @@ public class Window3 {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				
-				numberOfFrames =-1;
-
-				com.Sortex.controller.TCPClient.NUMBER_OF_FRAMES = numberOfFrames;
+//				numberOfFrames =-1;
+//
+//				com.Sortex.controller.TCPClient.NUMBER_OF_FRAMES = numberOfFrames;
 				System.out.println("Toggle monitoring "+isMonitoring);
 				
 					if(thread2!=null){
@@ -754,7 +761,7 @@ public class Window3 {
 								else{
 									com.Sortex.controller.Controller.startMonitoring();
 									isMonitoring = true;
-									com.Sortex.controller.TCPClient.train("stemRowData",tcpTimeout);
+									com.Sortex.controller.TCPClient.getFrames("stemRowData",tcpTimeout,-1);
 									
 									
 								}
@@ -785,7 +792,7 @@ public class Window3 {
 				numberOfFrames = temp * 3600;
 
 				System.out.println(temp);
-				com.Sortex.controller.TCPClient.NUMBER_OF_FRAMES = numberOfFrames;
+				//com.Sortex.controller.TCPClient.NUMBER_OF_FRAMES = numberOfFrames;
 
 				
 
@@ -818,7 +825,7 @@ public class Window3 {
 						thread2 = new Thread() {
 							public void run() {
 								try {
-									com.Sortex.controller.TCPClient.train("stemRowData",tcpTimeout);
+									com.Sortex.controller.TCPClient.getFrames("stemRowData",tcpTimeout,-1);
 								} catch (UnknownHostException e) {
 
 									e.printStackTrace();
@@ -884,7 +891,7 @@ public class Window3 {
 						thread2 = new Thread() {
 							public void run() {
 								try {
-									com.Sortex.controller.TCPClient.train("leafRowData",tcpTimeout);
+									com.Sortex.controller.TCPClient.getFrames("leafRowData",tcpTimeout,-1);
 								} catch (UnknownHostException e) {
 
 									e.printStackTrace();
