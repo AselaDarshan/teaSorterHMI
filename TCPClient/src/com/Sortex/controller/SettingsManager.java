@@ -24,6 +24,11 @@ public class SettingsManager {
 	private int ejectorOndelaySteps;
 	private int mux;
 	
+	private int exposureTime;
+	private int frameLength;
+	
+	
+
 	private int frameWidth;
 	private int frameHeight;
 	
@@ -52,7 +57,23 @@ public class SettingsManager {
 		
 		setTcpTimeOut(1000);
 	}
-	
+	public int getExposureTime() {
+		return exposureTime;
+	}
+
+	public void setExposureTime(int exposureTime) {
+		com.Sortex.controller.TCPClient.sendExposureTime(exposureTime);
+		this.exposureTime = exposureTime;
+	}
+
+	public int getFrameLength() {
+		return frameLength;
+	}
+
+	public void setFrameLength(int frameLength) {
+		com.Sortex.controller.TCPClient.sendFrameLength(frameLength);
+		this.frameLength = frameLength;
+	}
 	public int getFrameWidth() {
 		if(frameWidth==0){
 			return Constants.DEFAULT_IMAGE_WIDTH;

@@ -32,4 +32,6 @@ public class Constants {
 	public final static String MARGIN_KEY = "margin_";
 	
 	public final static String TCP_TIMEOUT_KEY = "tcp_timeout_ms";
+	
+	public final static String SNAPSHOT_SAVE_FOLDER = "snapshots";
 }

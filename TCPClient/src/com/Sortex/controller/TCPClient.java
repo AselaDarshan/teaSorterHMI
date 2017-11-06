@@ -34,19 +34,24 @@ public class TCPClient {
 	final static int HEADER_MUX =0x19; 
 	final static int HEADER_MIN_STEM_COUNT =0x11; 
 	
+	
+	
 	final static int HEADER_CURRENT_VIEW_WIDTH =0x1E; 
 	final static int HEADER_CURRENT_VIEW_HEIGHT =0x1F; 
+	
+	final static int HEADER_EXPOSURE_TIME = 0x2E;
+	final static int HEADER_FRAME_LENGTH = 0x2F;
 
 	private static Timer timer = new Timer();
 	static Socket clientSocket;
 	static DataOutputStream outToServer;
 	static InputStream in;
 	static DataInputStream dis;
-	public static boolean status = false;
+	public static boolean status = true;
 	
 	
 	public static boolean tcpReceive;
-	public static boolean isSendDataEnabled = true;
+	public static boolean isSendDataEnabled = false;
 	
 	public static boolean buildServerConnection()  {
 		
@@ -78,6 +83,26 @@ public class TCPClient {
 		paramBuffer[2] = toByte(0);
 		paramBuffer[1] = toByte(param1/256);
 		paramBuffer[0] = toByte(param1%256);
+		sendDataToCamera(paramBuffer);
+
+	}
+	public static void sendFrameLength(int frameLength) {
+		System.out.println("send frame length: "+frameLength);
+		byte[] paramBuffer = new byte[4];
+		paramBuffer[3] = toByte(HEADER_FRAME_LENGTH);
+		paramBuffer[2] = toByte(0);
+		paramBuffer[1] = toByte(frameLength/256);
+		paramBuffer[0] = toByte(frameLength%256);
+		sendDataToCamera(paramBuffer);
+
+	}
+	public static void sendExposureTime(int exposureTime) {
+		System.out.println("send exposure time: "+exposureTime);
+		byte[] paramBuffer = new byte[4];
+		paramBuffer[3] = toByte(HEADER_EXPOSURE_TIME);
+		paramBuffer[2] = toByte(0);
+		paramBuffer[1] = toByte(exposureTime/256);
+		paramBuffer[0] = toByte(exposureTime%256);
 		sendDataToCamera(paramBuffer);
 
 	}

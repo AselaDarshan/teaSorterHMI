@@ -1,6 +1,7 @@
 package com.Sortex.frontendController;
 
 import java.awt.BorderLayout;
+
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -120,6 +121,8 @@ public class Window3 {
 	private int tcpTimeout;
 
 	private JButton autoMarginButton;
+
+	private JButton captureButton;
 	
 	public JPanel createTestPanel(SettingsManager settingsManager) {
 		
@@ -303,6 +306,17 @@ public class Window3 {
 		autoMarginButton = new JButton("Auto Detect Margins");
 		autoMarginButton.setFont(new Font("Arial", Font.BOLD, Constants.SMALL_BUTTON_FONT_SIZE));
 		
+		JLabel exposureTimeLabel = new JLabel("Exposure");
+		exposureTimeLabel.setFont(new Font("Arial", Font.BOLD, Constants.TITLE_FONT_SIZE));
+		JSpinner exposureTimeSpinner = new JSpinner();
+		exposureTimeSpinner.setFont(new Font("Arial", Font.BOLD, Constants.VALUE_FONT_SIZE));
+		
+		JLabel frameLengthLabel = new JLabel("Frame Length");
+		frameLengthLabel.setFont(new Font("Arial", Font.BOLD, Constants.TITLE_FONT_SIZE));
+		JSpinner frameLengthSpinner = new JSpinner();
+		frameLengthSpinner.setFont(new Font("Arial", Font.BOLD, Constants.VALUE_FONT_SIZE));
+		 
+		 
 		cameraSettingPanel.add(roiXStartLabel, new GridBagConstraints(0, 0, 1, 1, 0.02, 0.1, GridBagConstraints.WEST,
 				GridBagConstraints.BOTH, new Insets(2, 6, 2, 2), 0, 0));
 		cameraSettingPanel.add(roiXStartSpinner, new GridBagConstraints(1, 0, 1, 1, 0.2, 0.1, GridBagConstraints.EAST,
@@ -311,6 +325,16 @@ public class Window3 {
 		cameraSettingPanel.add(roiXEndLabel, new GridBagConstraints(2, 0,1, 1, 0.02, 0.1, GridBagConstraints.WEST,
 				GridBagConstraints.BOTH, new Insets(2, 40, 2, 2), 0, 0));
 		cameraSettingPanel.add(roiXEndSpinner, new GridBagConstraints(3, 0,1, 1, 0.1, 0.1, GridBagConstraints.WEST,
+				GridBagConstraints.BOTH, new Insets(2, 2, 2, 2), 0, 0));
+		
+		cameraSettingPanel.add(exposureTimeLabel, new GridBagConstraints(0, 0, 1, 1, 0.02, 0.1, GridBagConstraints.WEST,
+				GridBagConstraints.BOTH, new Insets(2, 6, 2, 2), 0, 0));
+		cameraSettingPanel.add(exposureTimeSpinner, new GridBagConstraints(1, 0, 1, 1, 0.2, 0.1, GridBagConstraints.EAST,
+				GridBagConstraints.BOTH, new Insets(2, 2, 2, 2), 0, 0));
+		
+		cameraSettingPanel.add(frameLengthLabel, new GridBagConstraints(2, 0,1, 1, 0.02, 0.1, GridBagConstraints.WEST,
+				GridBagConstraints.BOTH, new Insets(2, 40, 2, 2), 0, 0));
+		cameraSettingPanel.add(frameLengthSpinner, new GridBagConstraints(3, 0,1, 1, 0.1, 0.1, GridBagConstraints.WEST,
 				GridBagConstraints.BOTH, new Insets(2, 2, 2, 2), 0, 0));
 		
 		cameraSettingPanel.add(roiYStartLabel, new GridBagConstraints(0, 1, 1, 1, 0.02, 0.1, GridBagConstraints.WEST,
@@ -341,6 +365,22 @@ public class Window3 {
 		
 		
 		//add change actions
+		frameLengthSpinner.addChangeListener(new ChangeListener() {
+	        @Override
+	        public void stateChanged(ChangeEvent e) {
+	            
+					settingsManager.setFrameLength((int)frameLengthSpinner.getValue());
+					
+	        }
+	    });
+		exposureTimeSpinner.addChangeListener(new ChangeListener() {
+	        @Override
+	        public void stateChanged(ChangeEvent e) {
+	            
+					settingsManager.setExposureTime((int)exposureTimeSpinner.getValue());
+					//roiXStartSpinner.setValue(settingsManager.getRoiXStart());
+	        }
+	    });
 		roiXStartSpinner.addChangeListener(new ChangeListener() {
 	        @Override
 	        public void stateChanged(ChangeEvent e) {
@@ -458,6 +498,7 @@ public class Window3 {
 		startButton = new JButton("Train");
 		monitorButton = new JButton("Live View");
 		resetButton = new JButton("Reset");
+		captureButton = new JButton("Capture");
 		int[] timeStrings = { 1, 2, 5, 10, 20, 30 };
 
 		JComboBox timeList = new JComboBox();
@@ -482,6 +523,7 @@ public class Window3 {
 		controls.add(applyButton);
 		controls.add(resetButton);
 		controls.add(monitorButton);
+		controls.add(captureButton);
 		inputLabels.add(noOfFrames);
 		inputField.add(timeList);
 		controlinputs.add(inputLabels, BorderLayout.WEST);
@@ -492,7 +534,30 @@ public class Window3 {
 		monitorButton.setBackground(new Color(6, 104, 135));
 		monitorButton.setOpaque(true);
 		resetButton.setBackground(Color.red);
+		captureButton.setBackground(new Color(6, 54, 35));
+		captureButton.setOpaque(true);
 
+		
+		captureButton.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				 JFrame frame = new JFrame("Capture frames");
+				
+
+				    // prompt the user to enter their name
+				    String numberOfFrames = JOptionPane.showInputDialog(frame, "Number of frames to capture");
+				    try {
+						TCPClient.getFrames(Constants.SNAPSHOT_SAVE_FOLDER, 3, Integer.parseInt(numberOfFrames));
+					} catch (NumberFormatException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					} catch (IOException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+				}
+			});
 		// reset button functions
 		resetButton.addActionListener(new ActionListener() {
 

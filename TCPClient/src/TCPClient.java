@@ -21,6 +21,7 @@ public class TCPClient {
 	
 
 	public static void buildServerConnection() throws UnknownHostException, IOException {
+	
 		clientSocket = new Socket("192.168.1.10", 7000);
 		outToServer = new DataOutputStream(clientSocket.getOutputStream());
 		in = clientSocket.getInputStream();
