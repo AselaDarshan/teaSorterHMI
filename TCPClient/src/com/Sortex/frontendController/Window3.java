@@ -22,6 +22,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.PrintStream;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 
@@ -49,9 +50,12 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.xml.ws.soap.AddressingFeature;
 
+import com.Sortex.controller.CapturePane;
 import com.Sortex.controller.Constants;
 import com.Sortex.controller.SettingsManager;
+import com.Sortex.controller.StreamCapturer;
 import com.Sortex.controller.TCPClient;
+import com.Sortex.controller.WatchdogTimer;
 
 public class Window3 {
 	JPanel container;
@@ -542,20 +546,36 @@ public class Window3 {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				 JFrame frame = new JFrame("Capture frames");
-				
+				JFrame frame = new JFrame("Capture frames");
+				    	
+			    	Thread thread2;
 
-				    // prompt the user to enter their name
+			
+						
+				thread2 = new Thread() {
+					  // prompt the user to enter their name
 				    String numberOfFrames = JOptionPane.showInputDialog(frame, "Number of frames to capture");
-				    try {
-						TCPClient.getFrames(Constants.SNAPSHOT_SAVE_FOLDER, 3, Integer.parseInt(numberOfFrames));
-					} catch (NumberFormatException e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
-					} catch (IOException e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
+				   
+					public void run() {
+						System.out.println("starting capture "+numberOfFrames+ " frames");
+						try {
+							
+							TCPClient.getFrames(Constants.SNAPSHOT_SAVE_FOLDER, 3, Integer.parseInt(numberOfFrames),true);
+							
+						} catch (NumberFormatException e1) {
+							// TODO Auto-generated catch block
+							e1.printStackTrace();
+						} catch (IOException e1) {
+							// TODO Auto-generated catch block
+							e1.printStackTrace();
+						}
+
 					}
+				};
+				thread2.start();
+				   
+				
+					
 				}
 			});
 		// reset button functions
@@ -814,33 +834,42 @@ public class Window3 {
 						thread2.interrupt();
 					}
 				
-					thread2 = new Thread() {
+					thread2 = createFrameReciveingThread();
+					thread2.start();
 					
-
+					Thread watchdogThread =  new Thread() {
 						public void run() {
-							try {
-								if(isMonitoring){
-									com.Sortex.controller.Controller.stopMonitoring();
-									isMonitoring = false;
-								}
-								else{
-									com.Sortex.controller.Controller.startMonitoring();
-									isMonitoring = true;
-									com.Sortex.controller.TCPClient.getFrames("stemRowData",tcpTimeout,-1);
+							
+							while(WatchdogTimer.isEnabled()) {
+								try {
+									WatchdogTimer.start();
+									Thread.sleep(Constants.WATCHDOG_TIMEOUT);
+									System.out.println("Checking watchdog timer");
+									if(!WatchdogTimer.isRested() && WatchdogTimer.isEnabled()) {
+										System.out.println("Frame receiver is not responding. restarting...");
+										thread2.interrupt();
+										
+										isMonitoring = false;
+										thread2 = createFrameReciveingThread();
+										thread2.start();
+										
+										
+									}
 									
 									
+								} catch (InterruptedException e) {
+									// TODO Auto-generated catch block
+									e.printStackTrace();
 								}
-							} catch (UnknownHostException e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
-							} catch (IOException e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
+								
 							}
-
 						}
 					};
-					thread2.start();
+					
+					WatchdogTimer.enable();
+					watchdogThread.start();
+					
+					
 			}
 		});
 
@@ -890,7 +919,8 @@ public class Window3 {
 						thread2 = new Thread() {
 							public void run() {
 								try {
-									com.Sortex.controller.TCPClient.getFrames("stemRowData",tcpTimeout,-1);
+									System.out.println("get stem images");
+									com.Sortex.controller.TCPClient.getFrames("stemRowData",tcpTimeout,-1,false);
 								} catch (UnknownHostException e) {
 
 									e.printStackTrace();
@@ -956,7 +986,8 @@ public class Window3 {
 						thread2 = new Thread() {
 							public void run() {
 								try {
-									com.Sortex.controller.TCPClient.getFrames("leafRowData",tcpTimeout,-1);
+									System.out.println("get leaf images");
+									com.Sortex.controller.TCPClient.getFrames("leafRowData",tcpTimeout,-1,false);
 								} catch (UnknownHostException e) {
 
 									e.printStackTrace();
@@ -1026,18 +1057,28 @@ public class Window3 {
 
 //		container.add(panel1, new GridBagConstraints(1, 0, 1, 1, 1, 1, GridBagConstraints.WEST, GridBagConstraints.BOTH,
 //				new Insets(2, 2, 2, 2), 0, 0));
-		container.add(thresholdPanel, new GridBagConstraints(0, 0, 2, 1, 1, 1, GridBagConstraints.WEST, GridBagConstraints.BOTH,new Insets(2, 2, 2, 2), 0, 0));
+		container.add(thresholdPanel, new GridBagConstraints(0, 0, 2, 1, 1, 0.9, GridBagConstraints.WEST, GridBagConstraints.BOTH,new Insets(2, 2, 2, 2), 0, 0));
 //		container.add(panel2, new GridBagConstraints(0, 1, 1, 1, 1, 1, GridBagConstraints.WEST, GridBagConstraints.BOTH,	new Insets(2, 2, 2, 2), 0, 0));
-		container.add(delaySettingPanel, new GridBagConstraints(0, 1, 2, 1, 1, 1, GridBagConstraints.WEST,GridBagConstraints.BOTH, new Insets(2, 2, 2, 2), 0, 0));
+		container.add(delaySettingPanel, new GridBagConstraints(0, 1, 2, 1, 1, 0.9, GridBagConstraints.WEST,GridBagConstraints.BOTH, new Insets(2, 2, 2, 2), 0, 0));
 //		container.add(panel3, new GridBagConstraints(0, 3, 2, 1, 1, 1, GridBagConstraints.WEST, GridBagConstraints.BOTH,new Insets(2, 2, 2, 2), 5, 5));
 		
 
 //		container.add(panel5, new GridBagConstraints(0, 4, 2, 1, 1, 1, GridBagConstraints.WEST, GridBagConstraints.BOTH,
 //				new Insets(2, 2, 2, 2), 0, 0));
-		container.add(cameraSettingPanel, new GridBagConstraints(0, 3, 2, 1, 1, 1, GridBagConstraints.WEST, GridBagConstraints.BOTH,new Insets(2, 2, 2, 2), 0, 0));
-		container.add(panel5, new GridBagConstraints(1, 5, 1, 1, 0.2, 1, GridBagConstraints.WEST, GridBagConstraints.BOTH,new Insets(2, 2, 2, 2), 0, 0));
-		container.add(panel4, new GridBagConstraints(0, 5, 1, 1, 4, 1, GridBagConstraints.WEST, GridBagConstraints.BOTH,new Insets(2, 2, 2, 2), 0, 0));
+		container.add(cameraSettingPanel, new GridBagConstraints(0, 3, 2, 1, 1, 0.9, GridBagConstraints.WEST, GridBagConstraints.BOTH,new Insets(2, 2, 2, 2), 0, 0));
+		container.add(panel5, new GridBagConstraints(1, 5, 1, 1, 0.2, 0.9, GridBagConstraints.WEST, GridBagConstraints.BOTH,new Insets(2, 2, 2, 2), 0, 0));
+		container.add(panel4, new GridBagConstraints(0, 4, 1, 1, 4, 0.9, GridBagConstraints.WEST, GridBagConstraints.BOTH,new Insets(2, 2, 2, 2), 0, 0));
 		
+		
+		//log panel
+		CapturePane capturePane = new CapturePane();
+		  PrintStream ps = System.out;
+          System.setOut(new PrintStream(new StreamCapturer("STDOUT", capturePane, ps)));
+
+          container.add( capturePane , new GridBagConstraints(0, 5, 1, 2, 4, 1, GridBagConstraints.WEST, GridBagConstraints.BOTH,new Insets(2, 2, 2, 2), 0, 0));
+  		
+  		
+          
 		try {
 		backgroundThresholdSlider.setValue(settingsManager.getBgThrshold());
 		Thread.sleep(5);
@@ -1061,6 +1102,10 @@ public class Window3 {
 		roiYEndSpinner.setValue(settingsManager.getRoiYEnd());
 		Thread.sleep(5);
 		muxSpinner.setValue(settingsManager.getMux());
+		Thread.sleep(5);
+		exposureTimeSpinner.setValue(settingsManager.getExposureTime());
+		Thread.sleep(5);
+		frameLengthSpinner.setValue(settingsManager.getFrameLength());
 		Thread.sleep(5);
 		
 		marginValueArray = settingsManager.getMarginsArray();
@@ -1247,6 +1292,35 @@ public class Window3 {
 	}
 	
 
+	private Thread createFrameReciveingThread() {
+		return new Thread() {
+			
+			public void run() {
+				try {
+					if(isMonitoring){
+						com.Sortex.controller.Controller.stopMonitoring();
+						isMonitoring = false;
+						WatchdogTimer.disable();
+					}
+					else{
+						com.Sortex.controller.Controller.startMonitoring();
+						isMonitoring = true;
+						
+						com.Sortex.controller.TCPClient.getFrames("stemRowData",tcpTimeout,-1,false);
+						
+						
+					}
+				} catch (UnknownHostException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+
+			}
+		};
+	}
 
 
 

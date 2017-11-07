@@ -28,10 +28,14 @@ public class Constants {
 	public final static String DELAY_STEPS_KEY = "delay_steps";
 	public final static String EJECTOR_ON_STEPS_KEY = "ejector_on_steps";
 	public final static String MUX_KEY = "mux";
+	public final static String FRAME_LENGTH_KEY = "frame_length";
+	public final static String EXPOSURE_TIME_KEY = "exposure_time";
 	
 	public final static String MARGIN_KEY = "margin_";
 	
 	public final static String TCP_TIMEOUT_KEY = "tcp_timeout_ms";
 	
 	public final static String SNAPSHOT_SAVE_FOLDER = "snapshots";
+	
+	public final static int WATCHDOG_TIMEOUT = 2000;
 }
