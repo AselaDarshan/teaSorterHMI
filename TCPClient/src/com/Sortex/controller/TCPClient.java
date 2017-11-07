@@ -183,7 +183,7 @@ public class TCPClient {
 		
 		recivedData = getDataFromCamera(paramBuffer,4);
 		
-		return  Byte.toUnsignedInt(recivedData[0])+ Byte.toUnsignedInt(recivedData[1])*256+ Byte.toUnsignedInt(recivedData[2])*256*256;
+		return  Byte.toUnsignedInt(recivedData[0])+ Byte.toUnsignedInt(recivedData[1])*256+ Byte.toUnsignedInt(recivedData[2])*256*256+ Byte.toUnsignedInt(recivedData[3])*256*256*256;
 
 	}
 	public static int getFramePeriodSoftware(){
@@ -198,7 +198,7 @@ public class TCPClient {
 		
 		recivedData = getDataFromCamera(paramBuffer,4);
 		
-		return  Byte.toUnsignedInt(recivedData[0])+ Byte.toUnsignedInt(recivedData[1])*256+ Byte.toUnsignedInt(recivedData[2])*256*256;
+		return  Byte.toUnsignedInt(recivedData[0])+ Byte.toUnsignedInt(recivedData[1])*256+ Byte.toUnsignedInt(recivedData[2])*256*256 + Byte.toUnsignedInt(recivedData[3])*256*256*256;
 
 	}
 	public static int getExposure(){
@@ -213,7 +213,7 @@ public class TCPClient {
 		
 		recivedData = getDataFromCamera(paramBuffer,4);
 		
-		return  Byte.toUnsignedInt(recivedData[0])+ Byte.toUnsignedInt(recivedData[1])*256+ Byte.toUnsignedInt(recivedData[2])*256*256;
+		return  Byte.toUnsignedInt(recivedData[0])+ Byte.toUnsignedInt(recivedData[1])*256;
 
 	}
 	public static int getFramePeriodCamera(){
@@ -228,7 +228,7 @@ public class TCPClient {
 		
 		recivedData = getDataFromCamera(paramBuffer,4);
 		
-		return  Byte.toUnsignedInt(recivedData[0])+ Byte.toUnsignedInt(recivedData[1])*256+ Byte.toUnsignedInt(recivedData[2])*256*256;
+		return  Byte.toUnsignedInt(recivedData[0])+ Byte.toUnsignedInt(recivedData[1])*256+ Byte.toUnsignedInt(recivedData[2])*256*256 + Byte.toUnsignedInt(recivedData[3])*256*256*256;
 
 	}
 	public static int getFrameWidth(){
