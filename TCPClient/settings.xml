@@ -37,5 +37,5 @@
 <entry key="ejector_on_steps">200</entry>
 <entry key="y_start">530</entry>
 <entry key="sl_threshold">338</entry>
-<entry key="mux">18</entry>
+<entry key="mux">0</entry>
 </properties>

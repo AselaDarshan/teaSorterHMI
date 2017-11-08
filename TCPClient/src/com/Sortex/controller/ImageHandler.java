@@ -13,20 +13,44 @@ import java.util.Arrays;
 public class ImageHandler {
 
 	public BufferedImage rgb32Torgb24BufferdImage(byte[] buf,int width,int height){
-		byte[] rgb8Buf = new byte[buf.length/4*3];
-		int pixelCount = 0;
-		long pixel;
-		for(int i=0;i<buf.length;i+=4){
-			pixel = getUInt32(Arrays.copyOfRange(buf, i, i+4));
-			rgb8Buf[pixelCount++] = (byte) (pixel%(Math.pow(2,30))/Math.pow(2,20)/4); 
-			rgb8Buf[pixelCount++] = (byte) (pixel%(Math.pow(2,10))/4); 
-			rgb8Buf[pixelCount++] = (byte) (pixel%(Math.pow(2,20))/Math.pow(2,10)/4); 
-
+		try{
+			byte[] rgb8Buf = new byte[buf.length*3/4];
+			int pixelCount = 0;
+			long pixel;
+			for(int i=0;i<buf.length;i+=4){
+				pixel = getUInt32(Arrays.copyOfRange(buf, i, i+4));
+				rgb8Buf[pixelCount++] = (byte) (pixel%(Math.pow(2,30))/Math.pow(2,20)/4); 
+				rgb8Buf[pixelCount++] = (byte) (pixel%(Math.pow(2,10))/4); 
+				rgb8Buf[pixelCount++] = (byte) (pixel%(Math.pow(2,20))/Math.pow(2,10)/4); 
+	
+			}
+	
+			return createRGBImage(rgb8Buf,width ,height);
+			}
+		catch(java.lang.NullPointerException e){
+			return null;
 		}
-
-		return createRGBImage(rgb8Buf,width ,height);
 	}
-	private BufferedImage createRGBImage(byte[] bytes, int width, int height) throws java.awt.image.RasterFormatException {
+	public byte[] rgb32torgb24(byte[] buf){
+		try{
+			byte[] rgb8Buf = new byte[buf.length*3/4];
+			int pixelCount = 0;
+			long pixel;
+			for(int i=0;i<buf.length;i+=4){
+				pixel = getUInt32(Arrays.copyOfRange(buf, i, i+4));
+				rgb8Buf[pixelCount++] = (byte) (pixel%(Math.pow(2,30))/Math.pow(2,20)/4); 
+				rgb8Buf[pixelCount++] = (byte) (pixel%(Math.pow(2,10))/4); 
+				rgb8Buf[pixelCount++] = (byte) (pixel%(Math.pow(2,20))/Math.pow(2,10)/4); 
+	
+			}
+	
+			return rgb8Buf;
+			}
+		catch(java.lang.NullPointerException e){
+			return null;
+		}
+	}
+	public BufferedImage createRGBImage(byte[] bytes, int width, int height) throws java.awt.image.RasterFormatException {
 
 		DataBufferByte buffer = new DataBufferByte(bytes, bytes.length);
 	    ColorModel cm = new ComponentColorModel(ColorSpace.getInstance(ColorSpace.CS_sRGB), new int[]{8, 8, 8}, false, false, Transparency.OPAQUE, DataBuffer.TYPE_BYTE);

@@ -17,6 +17,7 @@ public class Constants {
 	public final static int MAX_BYTES_IN_PACKET = 61440;
 	
 	public final static int NUMBER_OF_MARGINS = 25;
+	public final static int MARGIN_THRESHOLD = 200;
 	
 	public final static String BG_THRESHOLD_KEY = "bg_threshold";
 	public final static String SL_THRESHOLD_KEY = "sl_threshold";

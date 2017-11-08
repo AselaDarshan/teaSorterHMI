@@ -1,16 +1,15 @@
 package com.Sortex.controller;
 
-import java.awt.TrayIcon.MessageType;
+
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.*;
 import java.net.*;
-import java.util.Timer;
+//import java.util.Timer;
 
-import javax.sound.midi.Soundbank;
 import javax.swing.JDialog;
 import javax.swing.JOptionPane;
-import javax.swing.JProgressBar;
+
 
 public class TCPClient {
 	final static int NUMBER_OF_BYTES_PER_PACKET = 40000;//61440
@@ -37,7 +36,7 @@ public class TCPClient {
 	final static int HEADER_CURRENT_VIEW_WIDTH =0x1E; 
 	final static int HEADER_CURRENT_VIEW_HEIGHT =0x1F; 
 
-	private static Timer timer = new Timer();
+	//private static Timer timer = new Timer();
 	static Socket clientSocket;
 	static DataOutputStream outToServer;
 	static InputStream in;
@@ -390,14 +389,17 @@ public class TCPClient {
 	
 	
 	public static void getFrames(String folderName,int timeout, int numberOfFrames) throws IOException   {
-
+		if(!isSendDataEnabled){
+			System.out.println("communication is disabled");
+			return;
+		}
 		// FileHandler.saveAsGIF(1280, 1024, "out.bin");
 //		FileHandler.saveAllAsGif(1280, NUMBER_OF_LINES_PER_FRAME, "testInLeaf");
 		
 		byte[] _32bitframe = new byte[4];
-		for (byte b1 : _32bitframe) {
-			b1 = 0;
-
+		for (int i = 0; i < _32bitframe.length; i++) {
+			_32bitframe[i]=0;
+			
 		}
 
 		
@@ -471,7 +473,7 @@ public class TCPClient {
 
 					try{
 						// System.out.println("reading : "+(bytesPerPacket-bytesRecived));
-						int waitingTime = 0;
+					//	int waitingTime = 0;
 //						try{
 //						while(dis.available()<bytefPerNextPacket){
 //							try {

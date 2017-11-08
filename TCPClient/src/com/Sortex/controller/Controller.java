@@ -7,8 +7,7 @@ import java.awt.image.ComponentColorModel;
 import java.awt.image.DataBuffer;
 import java.awt.image.DataBufferByte;
 import java.awt.image.Raster;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
+
 import java.util.Arrays;
 import java.util.Timer;
 import java.util.TimerTask;

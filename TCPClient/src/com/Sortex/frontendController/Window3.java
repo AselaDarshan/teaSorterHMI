@@ -48,6 +48,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.xml.ws.soap.AddressingFeature;
 
+import com.Sortex.controller.AutoCalibration;
 import com.Sortex.controller.Constants;
 import com.Sortex.controller.SettingsManager;
 import com.Sortex.controller.TCPClient;
@@ -403,7 +404,16 @@ public class Window3 {
 	           
 	        }
 	    });
-		/*********************end *******************************************************/
+		
+		autoMarginButton.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				new AutoCalibration().detectMargins(tcpTimeout);
+			}
+		});
+		
+		/*********************end camera setting panel*******************************************************/
 		// add radio buttons
 		JRadioButton stem = new JRadioButton("Stem");
 
