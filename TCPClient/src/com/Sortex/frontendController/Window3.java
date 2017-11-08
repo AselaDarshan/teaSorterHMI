@@ -409,7 +409,15 @@ public class Window3 {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				new AutoCalibration().detectMargins(tcpTimeout);
+			
+				int[] marginsArray = new AutoCalibration().detectMargins(tcpTimeout);
+				settingsManager.setMarginsArray(marginsArray);
+				for(int i=Constants.NUMBER_OF_MARGINS-1;i>=0;i--){
+			
+					com.Sortex.controller.TCPClient.sendMargin(i,marginsArray[i]);
+					
+				}
+				
 			}
 		});
 		

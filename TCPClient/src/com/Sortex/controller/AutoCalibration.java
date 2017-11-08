@@ -7,12 +7,13 @@ import java.util.ArrayList;
 
 
 public class AutoCalibration {
-	public ArrayList<Integer> detectMargins(int tcpTimeout){
-		ArrayList<Integer> margins = new ArrayList<Integer>();
+	public int[] detectMargins(int tcpTimeout){
+		int[] margins = new int[Constants.NUMBER_OF_MARGINS];
 		SettingsManager settingsManager =  new SettingsManager();
 		settingsManager.retriveSettingsFromCamera();
 		int width = settingsManager.getFrameWidth();
 		int height = settingsManager.getFrameHeight();
+		int marginIndex = 0;
 		try {
 			//Retrieve image from camera
 			com.Sortex.controller.TCPClient.getFrames("stemRowData",tcpTimeout,3);
@@ -21,6 +22,8 @@ public class AutoCalibration {
 			int row = 0;
 			int startIndex = height/2*width*3;
 			int endIndex = startIndex+(width-1)*3;
+			
+			
 			if(image != null){
 				int startRow = 0;
 				int margin;
@@ -44,7 +47,10 @@ public class AutoCalibration {
 						row = (x-startIndex)/3;
 						margin = (startRow+row)/2;
 						System.out.println("margin "+margin );
-						margins.add(margin );
+						margins[marginIndex++] = margin;
+						if(marginIndex >= Constants.NUMBER_OF_MARGINS){
+							break;
+						}
 					
 						for(int y=0;y<height;y++){
 							image[y*width*3+(margin *3)] = (byte) 0;
@@ -71,7 +77,7 @@ public class AutoCalibration {
 			e.printStackTrace();
 		}
 		
-		System.out.println(margins.size()+ "margins detected");
+		System.out.println(marginIndex+ "margins detected");
 		return margins;
 	}
 }

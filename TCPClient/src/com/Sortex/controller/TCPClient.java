@@ -43,9 +43,10 @@ public class TCPClient {
 	static DataInputStream dis;
 	public static boolean status = false;
 	
-	
+	static boolean isRetringMessageShowing = false;
+	static boolean retryingCancelled = false;
 	public static boolean tcpReceive;
-	public static boolean isSendDataEnabled = true;
+	private static boolean isSendDataEnabled = false;
 	
 	public static boolean buildServerConnection()  {
 		
@@ -273,8 +274,7 @@ public class TCPClient {
 		
 
 	}
-	static boolean isRetringMessageShowing = false;
-	static boolean retryingCancelled = false;
+
 	
 	private static  void sendDataToCamera(byte[] paramBuffer){
 		Thread t = new Thread(new Runnable(){
