@@ -50,11 +50,10 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.xml.ws.soap.AddressingFeature;
 
-<<<<<<< HEAD
 import com.Sortex.controller.AutoCalibration;
-=======
+
 import com.Sortex.controller.CapturePane;
->>>>>>> ed0c4ea128aeeff95e02db4fd798d97fc7ae6a8a
+
 import com.Sortex.controller.Constants;
 import com.Sortex.controller.SettingsManager;
 import com.Sortex.controller.StreamCapturer;

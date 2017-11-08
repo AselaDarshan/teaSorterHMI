@@ -477,28 +477,22 @@ public class TCPClient {
 	}
 	
 	
-<<<<<<< HEAD
-	public static void getFrames(String folderName,int timeout, int numberOfFrames) throws IOException   {
+
+	public static void getFrames(String folderName,int timeout, int numberOfFrames,boolean filesave) throws IOException   {
+		
 		if(!isSendDataEnabled){
 			System.out.println("communication is disabled");
 			return;
 		}
-=======
-	public static void getFrames(String folderName,int timeout, int numberOfFrames,boolean filesave) throws IOException   {
 		WatchdogTimer.reset();
->>>>>>> ed0c4ea128aeeff95e02db4fd798d97fc7ae6a8a
 		// FileHandler.saveAsGIF(1280, 1024, "out.bin");
 //		FileHandler.saveAllAsGif(1280, NUMBER_OF_LINES_PER_FRAME, "testInLeaf");
 		
 		byte[] _32bitframe = new byte[4];
-<<<<<<< HEAD
-		for (int i = 0; i < _32bitframe.length; i++) {
-			_32bitframe[i]=0;
-			
-=======
+
 		for (byte b1 : _32bitframe) {
 			b1 = 0;
->>>>>>> ed0c4ea128aeeff95e02db4fd798d97fc7ae6a8a
+
 		}
 
 		int frameByteCount = 0;
