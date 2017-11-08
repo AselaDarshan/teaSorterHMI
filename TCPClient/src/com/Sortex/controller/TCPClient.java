@@ -70,7 +70,8 @@ public class TCPClient {
 				in = clientSocket.getInputStream();
 			} catch (IOException e) {
 				
-				JOptionPane.showMessageDialog(null , "Not Connected!");
+				//JOptionPane.showMessageDialog(null , "Not Connected!");
+				System.out.println("Connection error");
 				e.printStackTrace();
 				return false;
 			}
@@ -384,8 +385,8 @@ public class TCPClient {
 		if(isSendDataEnabled){
 		Thread t = null;
 		
-		 JOptionPane opt = new JOptionPane("Connection establishment failed. \nRetrying...", JOptionPane.ERROR_MESSAGE, JOptionPane.DEFAULT_OPTION, null, new Object[]{}); // no buttons
-	     final JDialog dlg = opt.createDialog("Connection Failed !");
+		 //JOptionPane opt = new JOptionPane("Connection establishment failed. \nRetrying...", JOptionPane.ERROR_MESSAGE, JOptionPane.DEFAULT_OPTION, null, new Object[]{}); // no buttons
+	   // JDialog dlg = opt.createDialog("Connection Failed !");
 		do{
 			System.out.println("sending 4 bytes:"+paramBuffer[3]+paramBuffer[2]+paramBuffer[1]+paramBuffer[0]);
 			if(buildServerConnection()){
@@ -395,13 +396,16 @@ public class TCPClient {
 					
 					if(isRetringMessageShowing){
 						isRetringMessageShowing = false;
-						dlg.dispose();
-						JOptionPane.showMessageDialog(null , "Successfully Connected to the Camera...","Connected!",1); 
+						System.out.println("Successfully Connected to the camera...");
+						//dlg.dispose();
+						//JOptionPane.showMessageDialog(null , "Successfully Connected to the Camera...","Connected!",1); 
 			        	
 					}
 					
 				} catch (IOException e) {
-					JOptionPane.showMessageDialog(null , "Connection error!");
+				//	JOptionPane.showMessageDialog(null , "Connection error!");
+					System.out.println("Connection error!");
+					
 				
 					e.printStackTrace();
 				
@@ -410,22 +414,22 @@ public class TCPClient {
 			else{
 				if(!isRetringMessageShowing){
 				     
-					isRetringMessageShowing = true;
-					t = new Thread(new Runnable(){
-						public void run(){
-							 dlg.setVisible(true);
-							 dlg.addWindowListener(new WindowAdapter() {
-								    @Override
-								    public void windowClosed(WindowEvent e) {
-								        isRetringMessageShowing = false;
-								        retryingCancelled = true;
-								        System.out.println("retrying window closed");
-								    }
-								});
+				//	isRetringMessageShowing = true;
+				//	t = new Thread(new Runnable(){
+				//		public void run(){
+							 //dlg.setVisible(true);
+							 //dlg.addWindowListener(new WindowAdapter() {
+							//	    @Override
+							//	    public void windowClosed(WindowEvent e) {
+							//	        isRetringMessageShowing = false;
+							//	        retryingCancelled = true;
+							//	        System.out.println("retrying window closed");
+							//	    }
+							//	});
 			        		//JOptionPane.showMessageDialog(null , "Connection establishment failed. \nRetrying...","Connection Failed !",0); 
-			        	}
-			    	});
-				t.start();
+			        	//}
+			    	//});
+				//t.start();
 				
 			  
 				}
@@ -458,7 +462,7 @@ public class TCPClient {
 				System.out.println(" end");
 				return recivedData;
 			} catch (IOException e) {
-				JOptionPane.showMessageDialog(null , "Connection error!");
+				System.out.println("Connection error!");
 			
 				e.printStackTrace();
 			}
