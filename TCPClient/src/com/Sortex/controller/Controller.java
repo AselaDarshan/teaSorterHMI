@@ -16,7 +16,7 @@ public class Controller {
 	
 	private static int imageNumber=0;
 	private static boolean monitor;
-	private static boolean fileSave=false;
+	
 	private static Viewer viewer;
 	public static void stopMonitoring(){
 		System.out.println("stop monitoring");
@@ -32,7 +32,7 @@ public class Controller {
 		monitor = true;
 	
 	}
-	public static void start(int numberOfFrames,String directoryName,final int width,final int height){
+	public static void start(int numberOfFrames,String directoryName,final int width,final int height,final boolean fileSave){
 		
 		
 		

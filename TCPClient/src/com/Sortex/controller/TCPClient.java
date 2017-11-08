@@ -33,15 +33,25 @@ public class TCPClient {
 	final static int HEADER_MUX =0x19; 
 	final static int HEADER_MIN_STEM_COUNT =0x11; 
 	
+	
+	
 	final static int HEADER_CURRENT_VIEW_WIDTH =0x1E; 
 	final static int HEADER_CURRENT_VIEW_HEIGHT =0x1F; 
+	
+	final static int HEADER_EXPOSURE_TIME = 0x24;
+	final static int HEADER_FRAME_LENGTH = 0x23;
+	
+	final static int HEADER_FRAME_PERIOD_CAMERA = 0x28;
+	final static int HEADER_FRAME_PERIOD_HARDWARE = 0x29;
+	final static int HEADER_FRAME_PERIOD_SOFTWARE = 0x2A;
+	final static int HEADER_EXPOSURE_TIME_STATUS = 0x2D;
 
 	//private static Timer timer = new Timer();
 	static Socket clientSocket;
 	static DataOutputStream outToServer;
 	static InputStream in;
 	static DataInputStream dis;
-	public static boolean status = false;
+	public static boolean status = true;
 	
 	static boolean isRetringMessageShowing = false;
 	static boolean retryingCancelled = false;
@@ -78,6 +88,26 @@ public class TCPClient {
 		paramBuffer[2] = toByte(0);
 		paramBuffer[1] = toByte(param1/256);
 		paramBuffer[0] = toByte(param1%256);
+		sendDataToCamera(paramBuffer);
+
+	}
+	public static void sendFrameLength(int frameLength) {
+		System.out.println("send frame length: "+frameLength);
+		byte[] paramBuffer = new byte[4];
+		paramBuffer[3] = toByte(HEADER_FRAME_LENGTH);
+		paramBuffer[2] = toByte(0);
+		paramBuffer[1] = toByte(frameLength/256);
+		paramBuffer[0] = toByte(frameLength%256);
+		sendDataToCamera(paramBuffer);
+
+	}
+	public static void sendExposureTime(int exposureTime) {
+		System.out.println("send exposure time: "+exposureTime);
+		byte[] paramBuffer = new byte[4];
+		paramBuffer[3] = toByte(HEADER_EXPOSURE_TIME);
+		paramBuffer[2] = toByte(0);
+		paramBuffer[1] = toByte(exposureTime/256);
+		paramBuffer[0] = toByte(exposureTime%256);
 		sendDataToCamera(paramBuffer);
 
 	}
@@ -141,7 +171,66 @@ public class TCPClient {
 		sendDataToCamera(paramBuffer);
 		
 	}
-	
+	public static int getFramePeriodHardware(){
+		
+		byte[] recivedData;
+		
+		byte[] paramBuffer = new byte[4];
+		paramBuffer[3] = toByte(HEADER_FRAME_PERIOD_HARDWARE);
+		paramBuffer[2] = toByte(0);
+		paramBuffer[1] = toByte(0);
+		paramBuffer[0] = toByte(0);
+		
+		recivedData = getDataFromCamera(paramBuffer,4);
+		
+		return  Byte.toUnsignedInt(recivedData[0])+ Byte.toUnsignedInt(recivedData[1])*256+ Byte.toUnsignedInt(recivedData[2])*256*256+ Byte.toUnsignedInt(recivedData[3])*256*256*256;
+
+	}
+	public static int getFramePeriodSoftware(){
+		
+		byte[] recivedData;
+		
+		byte[] paramBuffer = new byte[4];
+		paramBuffer[3] = toByte(HEADER_FRAME_PERIOD_SOFTWARE);
+		paramBuffer[2] = toByte(0);
+		paramBuffer[1] = toByte(0);
+		paramBuffer[0] = toByte(0);
+		
+		recivedData = getDataFromCamera(paramBuffer,4);
+		
+		return  Byte.toUnsignedInt(recivedData[0])+ Byte.toUnsignedInt(recivedData[1])*256+ Byte.toUnsignedInt(recivedData[2])*256*256 + Byte.toUnsignedInt(recivedData[3])*256*256*256;
+
+	}
+	public static int getExposure(){
+		
+		byte[] recivedData;
+		
+		byte[] paramBuffer = new byte[4];
+		paramBuffer[3] = toByte(HEADER_EXPOSURE_TIME_STATUS);
+		paramBuffer[2] = toByte(0);
+		paramBuffer[1] = toByte(0);
+		paramBuffer[0] = toByte(0);
+		
+		recivedData = getDataFromCamera(paramBuffer,4);
+		
+		return  Byte.toUnsignedInt(recivedData[0])+ Byte.toUnsignedInt(recivedData[1])*256;
+
+	}
+	public static int getFramePeriodCamera(){
+		
+		byte[] recivedData;
+		
+		byte[] paramBuffer = new byte[4];
+		paramBuffer[3] = toByte(HEADER_FRAME_PERIOD_CAMERA);
+		paramBuffer[2] = toByte(0);
+		paramBuffer[1] = toByte(0);
+		paramBuffer[0] = toByte(0);
+		
+		recivedData = getDataFromCamera(paramBuffer,4);
+		
+		return  Byte.toUnsignedInt(recivedData[0])+ Byte.toUnsignedInt(recivedData[1])*256+ Byte.toUnsignedInt(recivedData[2])*256*256 + Byte.toUnsignedInt(recivedData[3])*256*256*256;
+
+	}
 	public static int getFrameWidth(){
 	
 		byte[] recivedData;
@@ -388,21 +477,29 @@ public class TCPClient {
 	}
 	
 	
+<<<<<<< HEAD
 	public static void getFrames(String folderName,int timeout, int numberOfFrames) throws IOException   {
 		if(!isSendDataEnabled){
 			System.out.println("communication is disabled");
 			return;
 		}
+=======
+	public static void getFrames(String folderName,int timeout, int numberOfFrames,boolean filesave) throws IOException   {
+		WatchdogTimer.reset();
+>>>>>>> ed0c4ea128aeeff95e02db4fd798d97fc7ae6a8a
 		// FileHandler.saveAsGIF(1280, 1024, "out.bin");
 //		FileHandler.saveAllAsGif(1280, NUMBER_OF_LINES_PER_FRAME, "testInLeaf");
 		
 		byte[] _32bitframe = new byte[4];
+<<<<<<< HEAD
 		for (int i = 0; i < _32bitframe.length; i++) {
 			_32bitframe[i]=0;
 			
+=======
+		for (byte b1 : _32bitframe) {
+			b1 = 0;
+>>>>>>> ed0c4ea128aeeff95e02db4fd798d97fc7ae6a8a
 		}
-
-		
 
 		int frameByteCount = 0;
  		int bytesRecived = 0;
@@ -430,13 +527,14 @@ public class TCPClient {
 		FrameBuffer.clearBuffer();
 		// ... the code being measured ...
 
-		Controller.start(numberOfFrames, folderName,width,height);
+		Controller.start(numberOfFrames, folderName,width,height,filesave);
 		Thread.currentThread().setPriority(Thread.MAX_PRIORITY);
 		tcpReceive = true;
 		
 		buildServerConnection();
 		// get 1000 frames
 		for (int i = 0; (i < numberOfFrames||numberOfFrames==-1)&&tcpReceive; i++) {
+			WatchdogTimer.reset();
 			// long start = System.nanoTime();
 			frameByteCount = 0;
 			bytesRecived = 0;
@@ -456,7 +554,7 @@ public class TCPClient {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
-					getFrames(folderName,timeout,numberOfFrames);
+					getFrames(folderName,timeout,numberOfFrames,filesave);
 					return;
 				}
 				// frameNumber = dis.readInt();

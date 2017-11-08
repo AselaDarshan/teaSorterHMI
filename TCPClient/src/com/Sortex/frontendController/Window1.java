@@ -85,14 +85,14 @@ public class Window1 {
 		frame.setSize(800, 480);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		jtp.addTab("Settings", panel4);
-		jtp.addTab("Statistics", panel2);
+		jtp.addTab("Status", panel2);
 		frame.setVisible(true);
 		jtp.addChangeListener(new ChangeListener() {
 
 			@Override
 			public void stateChanged(ChangeEvent e) {
 				selectedIndex = jtp.getSelectedIndex();
-				System.out.println("You are in tab : " + selectedIndex);
+			//	System.out.println("You are in tab : " + selectedIndex);
 
 				
 			

@@ -16,7 +16,7 @@ public class AutoCalibration {
 		int marginIndex = 0;
 		try {
 			//Retrieve image from camera
-			com.Sortex.controller.TCPClient.getFrames("stemRowData",tcpTimeout,3);
+			com.Sortex.controller.TCPClient.getFrames("stemRowData",tcpTimeout,3,false);
 			
 			byte[]  image = new ImageHandler().rgb32torgb24(FrameBuffer.getFromBuffer());
 			int row = 0;

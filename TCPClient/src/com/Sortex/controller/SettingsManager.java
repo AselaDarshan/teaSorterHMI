@@ -24,6 +24,11 @@ public class SettingsManager {
 	private int ejectorOndelaySteps;
 	private int mux;
 	
+	private int exposureTime;
+	private int frameLength;
+	
+	
+
 	private int frameWidth;
 	private int frameHeight;
 	
@@ -52,7 +57,23 @@ public class SettingsManager {
 		
 		setTcpTimeOut(1000);
 	}
-	
+	public int getExposureTime() {
+		return exposureTime;
+	}
+
+	public void setExposureTime(int exposureTime) {
+		com.Sortex.controller.TCPClient.sendExposureTime(exposureTime);
+		this.exposureTime = exposureTime;
+	}
+
+	public int getFrameLength() {
+		return frameLength;
+	}
+
+	public void setFrameLength(int frameLength) {
+		com.Sortex.controller.TCPClient.sendFrameLength(frameLength);
+		this.frameLength = frameLength;
+	}
 	public int getFrameWidth() {
 		if(frameWidth==0){
 			return Constants.DEFAULT_IMAGE_WIDTH;
@@ -219,6 +240,8 @@ public class SettingsManager {
 	    saveProps.setProperty(Constants.Y_START_KEY,  String.valueOf(roiYStart));
 	    saveProps.setProperty(Constants.Y_END_KEY,  String.valueOf(roiYEnd));
 	    saveProps.setProperty(Constants.TCP_TIMEOUT_KEY,  String.valueOf(getTcpTimeOut()));
+	    saveProps.setProperty(Constants.FRAME_LENGTH_KEY,  String.valueOf(getFrameLength()));
+	    saveProps.setProperty(Constants.EXPOSURE_TIME_KEY,  String.valueOf(getExposureTime()));
 	    for(int i=0;i<Constants.NUMBER_OF_MARGINS;i++){
 			
 			saveProps.setProperty(Constants.MARGIN_KEY+i,  String.valueOf(marginsArray[i]));
@@ -251,6 +274,9 @@ public class SettingsManager {
 				mux = Integer.parseInt(loadProps.getProperty(Constants.MUX_KEY));
 				roiYStart = Integer.parseInt(loadProps.getProperty(Constants.Y_START_KEY));
 				roiYEnd = Integer.parseInt(loadProps.getProperty(Constants.Y_END_KEY));
+				frameLength = Integer.parseInt(loadProps.getProperty(Constants.FRAME_LENGTH_KEY));
+				exposureTime = Integer.parseInt(loadProps.getProperty(Constants.EXPOSURE_TIME_KEY));
+				
 				  for(int i=0;i<Constants.NUMBER_OF_MARGINS;i++){
 					  marginsArray[i] = Integer.parseInt(loadProps.getProperty(Constants.MARGIN_KEY+i));
 				  }
@@ -288,7 +314,8 @@ public class SettingsManager {
 		com.Sortex.controller.TCPClient.sendDelaySteps(ejectDelaySteps);
 		com.Sortex.controller.TCPClient.sendEjectOnSteps(ejectorOndelaySteps);
 		com.Sortex.controller.TCPClient.sendMux(mux);
-		
+		com.Sortex.controller.TCPClient.sendFrameLength(frameLength);
+		com.Sortex.controller.TCPClient.sendExposureTime(exposureTime);
 		for(int i=Constants.NUMBER_OF_MARGINS-1;i>=0;i--){
 				com.Sortex.controller.TCPClient.sendMargin(i,marginsArray[i]);
 				
