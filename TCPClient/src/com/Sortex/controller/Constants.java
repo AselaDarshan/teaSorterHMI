@@ -38,5 +38,6 @@ public class Constants {
 	
 	public final static String SNAPSHOT_SAVE_FOLDER = "snapshots";
 	
-	public final static int WATCHDOG_TIMEOUT = 2000;
+	public final static int WATCHDOG_TIMEOUT = 500;
+	public final static int UPDATE_TIMER = 500;
 }

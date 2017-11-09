@@ -45,6 +45,7 @@ public class TCPClient {
 	final static int HEADER_FRAME_PERIOD_HARDWARE = 0x29;
 	final static int HEADER_FRAME_PERIOD_SOFTWARE = 0x2A;
 	final static int HEADER_EXPOSURE_TIME_STATUS = 0x2D;
+	final static int HEADER_REST_LENGTH_STATUS = 0x2E;
 
 	//private static Timer timer = new Timer();
 	static Socket clientSocket;
@@ -56,7 +57,7 @@ public class TCPClient {
 	static boolean isRetringMessageShowing = false;
 	static boolean retryingCancelled = false;
 	public static boolean tcpReceive;
-	private static boolean isSendDataEnabled = false;
+	private static boolean isSendDataEnabled = true;
 	
 	public static boolean buildServerConnection()  {
 		
@@ -208,6 +209,21 @@ public class TCPClient {
 		
 		byte[] paramBuffer = new byte[4];
 		paramBuffer[3] = toByte(HEADER_EXPOSURE_TIME_STATUS);
+		paramBuffer[2] = toByte(0);
+		paramBuffer[1] = toByte(0);
+		paramBuffer[0] = toByte(0);
+		
+		recivedData = getDataFromCamera(paramBuffer,4);
+		
+		return  Byte.toUnsignedInt(recivedData[0])+ Byte.toUnsignedInt(recivedData[1])*256;
+
+	}
+public static int getResetLength(){
+		
+		byte[] recivedData;
+		
+		byte[] paramBuffer = new byte[4];
+		paramBuffer[3] = toByte(HEADER_REST_LENGTH_STATUS);
 		paramBuffer[2] = toByte(0);
 		paramBuffer[1] = toByte(0);
 		paramBuffer[0] = toByte(0);
@@ -386,7 +402,7 @@ public class TCPClient {
 		Thread t = null;
 		
 		 //JOptionPane opt = new JOptionPane("Connection establishment failed. \nRetrying...", JOptionPane.ERROR_MESSAGE, JOptionPane.DEFAULT_OPTION, null, new Object[]{}); // no buttons
-	   // JDialog dlg = opt.createDialog("Connection Failed !");
+	   // JDialog  dlg = opt.createDialog("Connection Failed !");
 		do{
 			System.out.println("sending 4 bytes:"+paramBuffer[3]+paramBuffer[2]+paramBuffer[1]+paramBuffer[0]);
 			if(buildServerConnection()){

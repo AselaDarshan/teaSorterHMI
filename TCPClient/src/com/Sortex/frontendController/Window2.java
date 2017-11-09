@@ -9,9 +9,12 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.io.IOException;
 import java.net.UnknownHostException;
 
+import javax.swing.AbstractButton;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -25,14 +28,19 @@ import javax.swing.event.ChangeListener;
 
 import com.Sortex.controller.Constants;
 import com.Sortex.controller.TCPClient;
+import com.Sortex.controller.WatchdogTimer;
 
 public class Window2 {
 
 	
 	
 
-
-
+	JTextField framePeriodCameraText;
+	JTextField framePeriodHardwareText;
+	JTextField framePeriodSoftwareText;
+	JTextField resetLengthText;
+	JTextField exposureText ;
+	Thread updaterThread = null;
 
 	public JPanel init() {
 
@@ -50,33 +58,30 @@ public class Window2 {
 		
 		JLabel framePeriodCameraLabel = new JLabel("Sensor");
 		framePeriodCameraLabel.setFont(new Font("Arial", Font.BOLD, Constants.TITLE_FONT_SIZE));
-		JTextField framePeriodCameraText = new JTextField();
+		framePeriodCameraText = new JTextField();
 		framePeriodCameraText .setFont(new Font("Arial", Font.BOLD, Constants.VALUE_FONT_SIZE));
 		framePeriodCameraText.setEditable(false);
 		
 		JLabel framePeriodHardwareLabel = new JLabel("Hardware");
 		framePeriodCameraLabel.setFont(new Font("Arial", Font.BOLD, Constants.TITLE_FONT_SIZE));
-		JTextField framePeriodHardwareText = new JTextField();
+		framePeriodHardwareText = new JTextField();
 		framePeriodHardwareText .setFont(new Font("Arial", Font.BOLD, Constants.VALUE_FONT_SIZE));
 		framePeriodHardwareText.setEditable(false);
 		
 		JLabel framePeriodSoftwareLabel = new JLabel("Software");
 		framePeriodCameraLabel.setFont(new Font("Arial", Font.BOLD, Constants.TITLE_FONT_SIZE));
-		JTextField framePeriodSoftwareText = new JTextField();
+		framePeriodSoftwareText = new JTextField();
 		framePeriodSoftwareText .setFont(new Font("Arial", Font.BOLD, Constants.VALUE_FONT_SIZE));
 		framePeriodSoftwareText.setEditable(false);
 		
-		JLabel exposureLabel = new JLabel("Exposure");
-		framePeriodCameraLabel.setFont(new Font("Arial", Font.BOLD, Constants.TITLE_FONT_SIZE));
-		JTextField exposureText = new JTextField();
-		exposureText .setFont(new Font("Arial", Font.BOLD, Constants.VALUE_FONT_SIZE));
-		exposureText.setEditable(false);
 		
 		
+		
+
 		TitledBorder framePeriodBorder = new TitledBorder("Frame Period");
 		framePeriodBorder.setTitleFont(new Font("Arial", Font.BOLD, Constants.PANEL_TITLE_FONT_SIZE));
 		framePeriodBorder.setTitleColor(new Color(6, 154, 35));
-		framePeriodBorder.setTitleJustification(TitledBorder.CENTER);
+		framePeriodBorder.setTitleJustification(TitledBorder.LEFT);
 		framePeriodBorder.setTitlePosition(TitledBorder.TOP);
 		framePeriodPanel.setBorder(framePeriodBorder);
 		
@@ -95,10 +100,7 @@ public class Window2 {
 		
 		cameraStatusPanel.add(framePeriodPanel, new GridBagConstraints(0, 0, 1, 1, 0.6,0.1, GridBagConstraints.WEST,
 				GridBagConstraints.BOTH, new Insets(2, 2, 2, 2), 0, 0));
-		cameraStatusPanel.add(exposureLabel, new GridBagConstraints(1, 0, 1, 1, 0.1,0.1, GridBagConstraints.WEST,
-				GridBagConstraints.BOTH, new Insets(2, 40, 2, 2), 0, 0));
-		cameraStatusPanel.add( exposureText , new GridBagConstraints(2, 0, 1, 1, 0.2, 0.1, GridBagConstraints.WEST,
-				GridBagConstraints.BOTH, new Insets(2, 2, 2, 2), 0, 0));
+		
 		
 		TitledBorder cameraStatusBorder = new TitledBorder("Camera Status");
 		cameraStatusBorder.setTitleFont(new Font("Arial", Font.BOLD, Constants.PANEL_TITLE_FONT_SIZE));
@@ -106,7 +108,33 @@ public class Window2 {
 		cameraStatusBorder.setTitleJustification(TitledBorder.CENTER);
 		cameraStatusBorder.setTitlePosition(TitledBorder.TOP);
 		cameraStatusPanel.setBorder(cameraStatusBorder);
+		/****integration time panel**/
+		JPanel integrationTimePanel = new JPanel(new GridBagLayout());
 		
+		JLabel exposureLabel = new JLabel("Exposure");
+		framePeriodCameraLabel.setFont(new Font("Arial", Font.BOLD, Constants.TITLE_FONT_SIZE));
+		exposureText = new JTextField();
+		exposureText .setFont(new Font("Arial", Font.BOLD, Constants.VALUE_FONT_SIZE));
+		exposureText.setEditable(false);
+		
+		JLabel resetLengthLabel = new JLabel("Reset Length");
+		resetLengthLabel.setFont(new Font("Arial", Font.BOLD, Constants.TITLE_FONT_SIZE));
+		resetLengthText = new JTextField();
+		resetLengthText.setFont(new Font("Arial", Font.BOLD, Constants.VALUE_FONT_SIZE));
+		resetLengthText.setEditable(false);
+		
+		integrationTimePanel.add(resetLengthLabel , new GridBagConstraints(1, 0, 1, 1, 0.1,0.1, GridBagConstraints.WEST,
+				GridBagConstraints.BOTH, new Insets(2, 40, 2, 2), 0, 0));
+		integrationTimePanel.add(resetLengthText , new GridBagConstraints(2, 0, 1, 1, 0.2, 0.1, GridBagConstraints.WEST,
+				GridBagConstraints.BOTH, new Insets(2, 2, 2, 2), 0, 0));
+		
+		integrationTimePanel.add(exposureLabel, new GridBagConstraints(3, 0, 1, 1, 0.1,0.1, GridBagConstraints.WEST,
+				GridBagConstraints.BOTH, new Insets(2, 40, 2, 2), 0, 0));
+		integrationTimePanel.add( exposureText , new GridBagConstraints(4, 0, 1, 1, 0.2, 0.1, GridBagConstraints.WEST,
+				GridBagConstraints.BOTH, new Insets(2, 2, 2, 2), 0, 0));
+		
+		cameraStatusPanel.add(integrationTimePanel, new GridBagConstraints(0, 1, 1, 1, 0.6,0.1, GridBagConstraints.WEST,
+				GridBagConstraints.BOTH, new Insets(2, 2, 2, 2), 0, 0));
 		/**********************
 		 * control button panel
 		 **************************************************/
@@ -122,6 +150,7 @@ public class Window2 {
 				framePeriodSoftwareText.setText(String.valueOf(TCPClient.getFramePeriodSoftware()));
 				framePeriodHardwareText.setText(String.valueOf(TCPClient.getFramePeriodHardware()));
 				exposureText.setText(String.valueOf(TCPClient.getExposure()));
+				resetLengthText.setText(String.valueOf(TCPClient.getResetLength()));
 			}
 			
 		});
@@ -136,6 +165,7 @@ public class Window2 {
 		
 		container.add(cameraStatusPanel, new GridBagConstraints(0,0 , 1, 1, 1, 0.08, GridBagConstraints.WEST, GridBagConstraints.BOTH,
 				new Insets(2, 2, 2, 2), 0, 0));
+	
 		container.add(buttonPanel, new GridBagConstraints(0, 1, 1, 1, 1, 0.1, GridBagConstraints.WEST, GridBagConstraints.BOTH,
 				new Insets(2, 680, 2, 20), 0, 0));
 		container.add(emptyPanel, new GridBagConstraints(0, 2, 1, 1, 1, 2, GridBagConstraints.WEST, GridBagConstraints.BOTH,
@@ -144,11 +174,57 @@ public class Window2 {
 		
 
 		container.setPreferredSize(new Dimension(400, 100));
+		
+		
+		container.addComponentListener ( new ComponentAdapter ()
+		    {
+		        public void componentShown ( ComponentEvent e )
+		        {
+		            System.out.println ( "status shown" );
+		            updaterThread = getUpdaterThread();
+		            updaterThread.start();
+		            
+		        }
+
+		        public void componentHidden ( ComponentEvent e )
+		        {
+		            System.out.println ( "status hidden" );
+		            if(updaterThread !=null)
+		            	updaterThread.interrupt();
+		        }
+		    } ); 
+		
+		
+		
+	
 		return container;
 
 	}
 
-	
+	private Thread getUpdaterThread(){
+		return new Thread() {
+		
+			public void run() {
+				
+				
+					try {
+						
+						Thread.sleep(Constants.UPDATE_TIMER);
+						framePeriodCameraText.setText(String.valueOf(TCPClient.getFramePeriodCamera()));
+						framePeriodSoftwareText.setText(String.valueOf(TCPClient.getFramePeriodSoftware()));
+						framePeriodHardwareText.setText(String.valueOf(TCPClient.getFramePeriodHardware()));
+						exposureText.setText(String.valueOf(TCPClient.getExposure()));
+						resetLengthText.setText(String.valueOf(TCPClient.getResetLength()));
+						
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					
+				
+			}
+		};
+	}
 	
 
 

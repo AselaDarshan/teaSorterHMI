@@ -67,7 +67,7 @@ public class Controller {
 									//System.out.println("monitoring");
 								}
 								else if(fileSave){
-									FileHandler.writeFile(rgb8Buf, new String(""+imageNumber),directoryName);
+									FileHandler.writeFile(buf, new String(""+imageNumber),directoryName);
 									imageNumber++;
 									System.out.println(imageNumber);
 									if(imageNumber>numberOfFrames){

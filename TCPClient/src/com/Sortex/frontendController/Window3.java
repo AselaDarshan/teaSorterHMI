@@ -55,6 +55,7 @@ import com.Sortex.controller.AutoCalibration;
 import com.Sortex.controller.CapturePane;
 
 import com.Sortex.controller.Constants;
+import com.Sortex.controller.Controller;
 import com.Sortex.controller.SettingsManager;
 import com.Sortex.controller.StreamCapturer;
 import com.Sortex.controller.TCPClient;
@@ -766,11 +767,11 @@ public class Window3 {
 			
 		
 		delaySettingPanel.add(delayStepsLabel,new GridBagConstraints(5, 0, 1, 1, 0.05, 0.1,	GridBagConstraints.EAST,	
-				GridBagConstraints.BOTH, new Insets(2, 40, 2, 2), 0, 0));
+				GridBagConstraints.BOTH, new Insets(2, 20, 2, 2), 0, 0));
 		delaySettingPanel.add(delayStepsSpinner,new GridBagConstraints(6, 0, 1, 1, 0.3, 0.1, GridBagConstraints.EAST,	GridBagConstraints.BOTH, new Insets(2, 2, 2, 2), 0, 0));
 		
-		delaySettingPanel.add(ejectDurationLabel,new GridBagConstraints(7, 0, 1, 1, 0.05, 0.1, GridBagConstraints.CENTER,
-				GridBagConstraints.BOTH, new Insets(2, 40, 2, 2), 0, 0));
+		delaySettingPanel.add(ejectDurationLabel,new GridBagConstraints(7, 0, 1, 1, 0.03, 0.1, GridBagConstraints.CENTER,
+				GridBagConstraints.BOTH, new Insets(2, 20, 2, 2), 0, 0));
 		delaySettingPanel.add(ejectDurationSpinner,new GridBagConstraints(8, 0, 1, 1, 0.3, 0.1, GridBagConstraints.EAST,
 				GridBagConstraints.BOTH, new Insets(2, 2, 2, 2), 0, 0));
 		
@@ -854,7 +855,7 @@ public class Window3 {
 						thread2.interrupt();
 					}
 				
-					thread2 = createFrameReciveingThread();
+					thread2 = createFrameReciveingThread(true);
 					thread2.start();
 					
 					Thread watchdogThread =  new Thread() {
@@ -867,10 +868,11 @@ public class Window3 {
 									System.out.println("Checking watchdog timer");
 									if(!WatchdogTimer.isRested() && WatchdogTimer.isEnabled()) {
 										System.out.println("Frame receiver is not responding. restarting...");
+										
 										thread2.interrupt();
 										
 										isMonitoring = false;
-										thread2 = createFrameReciveingThread();
+										thread2 = createFrameReciveingThread(false);
 										thread2.start();
 										
 										
@@ -889,7 +891,7 @@ public class Window3 {
 					WatchdogTimer.enable();
 					watchdogThread.start();
 					
-					
+				
 			}
 		});
 
@@ -1312,7 +1314,7 @@ public class Window3 {
 	}
 	
 
-	private Thread createFrameReciveingThread() {
+	private Thread createFrameReciveingThread(boolean createWindow) {
 		return new Thread() {
 			
 			public void run() {
@@ -1323,7 +1325,9 @@ public class Window3 {
 						WatchdogTimer.disable();
 					}
 					else{
-						com.Sortex.controller.Controller.startMonitoring();
+						if(createWindow){
+							com.Sortex.controller.Controller.startMonitoring();
+						}
 						isMonitoring = true;
 						
 						com.Sortex.controller.TCPClient.getFrames("stemRowData",tcpTimeout,-1,false);

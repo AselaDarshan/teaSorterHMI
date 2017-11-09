@@ -70,7 +70,7 @@ public class FileHandler {
 		new File(directoryName).mkdir();
 		// long starttime;
 		// long time;
-		String path = directoryName+"/" + fileName + ".bin";
+		String path = directoryName+"/" + fileName;
 		try {
 			// starttime=System.nanoTime();
 			Files.write(Paths.get(path), rawData);
