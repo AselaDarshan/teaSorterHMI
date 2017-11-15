@@ -150,9 +150,14 @@ public class SettingsManager {
         	return;
 		}
 		if(roiYEnd>roiYStart){
-			com.Sortex.controller.TCPClient.sendROIYStart(roiYStart);
-		
-			this.roiYStart = roiYStart;
+			if(roiYEnd - roiYStart<Constants.MAX_HEIGHT) {
+				com.Sortex.controller.TCPClient.sendROIYStart(roiYStart);
+			
+				this.roiYStart = roiYStart;
+			}
+			else {
+				JOptionPane.showMessageDialog(null ,"Max height is "+Constants.MAX_HEIGHT,"Height excessed maximum height",0); 
+			}
 		}
 		else{
 			JOptionPane.showMessageDialog(null , "Y start should be less than Y end","Invalied Setting !",0); 
@@ -163,9 +168,17 @@ public class SettingsManager {
 		return roiYEnd;
 	}
 	public void setRoiYEnd(int roiYEnd) {
+		
+		
+		
 		if(roiYEnd>roiYStart){
-			com.Sortex.controller.TCPClient.sendROIYEnd(roiYEnd);
-			this.roiYEnd = roiYEnd;
+			if(roiYEnd - roiYStart<Constants.MAX_HEIGHT) {
+				com.Sortex.controller.TCPClient.sendROIYEnd(roiYEnd);
+				this.roiYEnd = roiYEnd;
+			}
+			else {
+				JOptionPane.showMessageDialog(null ,"Max height is "+Constants.MAX_HEIGHT,"Height excessed maximum height",0); 
+			}
 		}
 		else{
 			JOptionPane.showMessageDialog(null , "Y end should be larger than Y start","Invalied Setting !",0); 

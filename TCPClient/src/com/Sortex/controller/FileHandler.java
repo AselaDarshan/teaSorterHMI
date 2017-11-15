@@ -65,6 +65,8 @@ public class FileHandler {
 		}
 	}
 	
+	
+	
 	public static void writeFile(byte[] rawData, String fileName,String directoryName) {
 //		System.out.println("Writing row datafiles ..............");
 		new File(directoryName).mkdir();

@@ -40,4 +40,7 @@ public class Constants {
 	
 	public final static int WATCHDOG_TIMEOUT = 500;
 	public final static int UPDATE_TIMER = 500;
+	
+	public final static int MAX_HEIGHT = 150;
+	public final static int BUFFER_SIZE = 300;
 }

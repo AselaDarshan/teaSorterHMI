@@ -4,7 +4,11 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.File;
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -41,6 +45,9 @@ public class Window1 {
 		frame = new JFrame("SORTEX");
 		frame.setResizable(false);
 		jtp = new JTabbedPane();
+		
+		JButton button = new JButton("Restart");
+		frame.getContentPane().add(button);
 		frame.getContentPane().add(jtp);
 		window2 = new Window2();
 		panel = new JPanel();
@@ -109,5 +116,5 @@ public class Window1 {
 		            });
 
 	}
-
+	
 }

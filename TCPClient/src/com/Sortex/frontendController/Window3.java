@@ -23,8 +23,11 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
+import java.lang.management.ManagementFactory;
+import java.net.URISyntaxException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
@@ -131,6 +134,8 @@ public class Window3 {
 	private JButton autoMarginButton;
 
 	private JButton captureButton;
+
+	private JButton restartButton;
 	
 	public JPanel createTestPanel(SettingsManager settingsManager) {
 		
@@ -457,7 +462,7 @@ public class Window3 {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 			
-				int[] marginsArray = new AutoCalibration().detectMargins(tcpTimeout);
+				int[] marginsArray = new AutoCalibration().detectMarginsInBlackWhiteStrips(tcpTimeout);
 				settingsManager.setMarginsArray(marginsArray);
 				for(int i=Constants.NUMBER_OF_MARGINS-1;i>=0;i--){
 			
@@ -524,6 +529,7 @@ public class Window3 {
 		monitorButton = new JButton("Live View");
 		resetButton = new JButton("Reset");
 		captureButton = new JButton("Capture");
+		restartButton = new JButton("Restart");
 		int[] timeStrings = { 1, 2, 5, 10, 20, 30 };
 
 		JComboBox timeList = new JComboBox();
@@ -546,9 +552,10 @@ public class Window3 {
 		controls.add(startButton);
 		controls.add(saveButton);
 		controls.add(applyButton);
-		controls.add(resetButton);
+		//controls.add(resetButton);
 		controls.add(monitorButton);
 		controls.add(captureButton);
+		controls.add(restartButton);
 		inputLabels.add(noOfFrames);
 		inputField.add(timeList);
 		controlinputs.add(inputLabels, BorderLayout.WEST);
@@ -561,44 +568,80 @@ public class Window3 {
 		resetButton.setBackground(Color.red);
 		captureButton.setBackground(new Color(6, 54, 35));
 		captureButton.setOpaque(true);
+		restartButton.setBackground(new Color(120, 54, 35));
+		restartButton.setOpaque(true);
 
 		
-		captureButton.addActionListener(new ActionListener() {
+		
+		restartButton.addActionListener(new ActionListener() {
 
 			@Override
-			public void actionPerformed(ActionEvent e) {
-				JFrame frame = new JFrame("Capture frames");
-				    	
-			    	Thread thread2;
-
-			
-						
-				thread2 = new Thread() {
-					  // prompt the user to enter their name
-				    String numberOfFrames = JOptionPane.showInputDialog(frame, "Number of frames to capture");
-				   
-					public void run() {
-						System.out.println("starting capture "+numberOfFrames+ " frames");
-						try {
-							
-							TCPClient.getFrames(Constants.SNAPSHOT_SAVE_FOLDER, 3, Integer.parseInt(numberOfFrames),true);
-							
-						} catch (NumberFormatException e1) {
-							// TODO Auto-generated catch block
-							e1.printStackTrace();
-						} catch (IOException e1) {
-							// TODO Auto-generated catch block
-							e1.printStackTrace();
-						}
-
-					}
-				};
-				thread2.start();
-				   
+			public void actionPerformed(ActionEvent e) 
+			{
 				
-					
+					restartApplication();
+			
+			}
+		});
+		captureButton.addActionListener(new ActionListener() {
+			Thread thread2;
+			JFrame frame = new JFrame("Capture frames");
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				 String numberOfFrames = JOptionPane.showInputDialog(frame, "Number of frames to capture");
+				
+				if(thread2!=null){
+					TCPClient.tcpReceive = false;
+					thread2.interrupt();
 				}
-			});
+				
+				thread2 = new Thread() {
+					public void run() {
+						TCPClient.tcpReceive = true;
+						System.out.println("starting capture "+numberOfFrames+ " frames");
+						TCPClient.getFramesRealTime(Integer.parseInt(numberOfFrames));
+					}
+						
+				
+			};
+			thread2.start();
+			}
+		});
+				
+//			@Override
+//			public void actionPerformed(ActionEvent e) {
+//				JFrame frame = new JFrame("Capture frames");
+//				    	
+//			    	Thread thread2;
+//
+//			
+//						
+//				thread2 = new Thread() {
+//					  // prompt the user to enter their name
+//				    String numberOfFrames = JOptionPane.showInputDialog(frame, "Number of frames to capture");
+//				   
+//					public void run() {
+//						System.out.println("starting capture "+numberOfFrames+ " frames");
+//						try {
+//							
+//							TCPClient.getFrames(Constants.SNAPSHOT_SAVE_FOLDER, 3, Integer.parseInt(numberOfFrames),true);
+//							
+//						} catch (NumberFormatException e1) {
+//							// TODO Auto-generated catch block
+//							System.out.println("invalid number");
+//						} catch (IOException e1) {
+//							// TODO Auto-generated catch block
+//							System.out.println("Capture failed due to connection error");
+//						}
+//
+//					}
+//				};
+//				thread2.start();
+//				   
+//				
+//					
+//				}
+//			});
 		// reset button functions
 		resetButton.addActionListener(new ActionListener() {
 
@@ -846,52 +889,65 @@ public class Window3 {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				
-//				numberOfFrames =-1;
-//
-//				com.Sortex.controller.TCPClient.NUMBER_OF_FRAMES = numberOfFrames;
 				System.out.println("Toggle monitoring "+isMonitoring);
 				
-					if(thread2!=null){
-						thread2.interrupt();
+				if(thread2!=null){
+					TCPClient.tcpReceive = false;
+					thread2.interrupt();
+				}
+				
+				thread2 = new Thread() {
+					public void run() {
+					if(isMonitoring) {
+						TCPClient.tcpReceive = false;
+						isMonitoring = false;
+					}else {
+						isMonitoring = true;
+						TCPClient.tcpReceive = true;
+						TCPClient.getFramesRealTime(0);
+					}
+						
+					
 					}
 				
-					thread2 = createFrameReciveingThread(true);
-					thread2.start();
-					
-					Thread watchdogThread =  new Thread() {
-						public void run() {
-							
-							while(WatchdogTimer.isEnabled()) {
-								try {
-									WatchdogTimer.start();
-									Thread.sleep(Constants.WATCHDOG_TIMEOUT);
-									System.out.println("Checking watchdog timer");
-									if(!WatchdogTimer.isRested() && WatchdogTimer.isEnabled()) {
-										System.out.println("Frame receiver is not responding. restarting...");
-										
-										thread2.interrupt();
-										
-										isMonitoring = false;
-										thread2 = createFrameReciveingThread(false);
-										thread2.start();
-										
-										
-									}
-									
-									
-								} catch (InterruptedException e) {
-									// TODO Auto-generated catch block
-									e.printStackTrace();
-								}
-								
-							}
-						}
-					};
-					
-					WatchdogTimer.enable();
-					watchdogThread.start();
-					
+			};
+			thread2.start();
 				
+			
+//				thread2 = createFrameReciveingThread(true);
+//				thread2.start();
+//				
+//				Thread watchdogThread =  new Thread() {
+//					public void run() {
+//						
+//						while(WatchdogTimer.isEnabled()) {
+//							try {
+//								WatchdogTimer.start();
+//								Thread.sleep(Constants.WATCHDOG_TIMEOUT);
+//								System.out.println("Checking watchdog timer");
+//								if(!WatchdogTimer.isRested() && WatchdogTimer.isEnabled()) {
+//									System.out.println("Frame receiver is not responding. restarting...");
+//									
+//									thread2.interrupt();
+//									
+//									isMonitoring = false;
+//									thread2 = createFrameReciveingThread(false);
+//									thread2.start();
+//									
+//								}
+//								
+//							} catch (InterruptedException e) {
+//								
+//							}
+//							
+//						}
+//					}
+//				};
+//				
+//				WatchdogTimer.enable();
+//				watchdogThread.start();
+//					
+//				
 			}
 		});
 
@@ -1099,9 +1155,10 @@ public class Window3 {
 
           container.add( capturePane , new GridBagConstraints(0, 5, 1, 2, 4, 1, GridBagConstraints.WEST, GridBagConstraints.BOTH,new Insets(2, 2, 2, 2), 0, 0));
   		
-  		
+          TCPClient.isSendDataEnabled = false;
           
 		try {
+			
 		backgroundThresholdSlider.setValue(settingsManager.getBgThrshold());
 		Thread.sleep(5);
 		stemLeafThresholdSlider.setValue(settingsManager.getStemLeafThreshold());
@@ -1140,8 +1197,9 @@ public class Window3 {
 		
 		} catch (InterruptedException e1) {
 			// TODO Auto-generated catch block
-			e1.printStackTrace();
+			System.out.println("set setting values failed");
 		}
+		TCPClient.isSendDataEnabled = true;
 		return container;
 	}
 
@@ -1346,8 +1404,20 @@ public class Window3 {
 		};
 	}
 
-
-
-	
-
+	/** 
+	 * Sun property pointing the main class and its arguments. 
+	 * Might not be defined on non Hotspot VM implementations.
+	 */
+	public static final String SUN_JAVA_COMMAND = "sun.java.command";
+	public static void restartApplication()  {
+		String[] mainCommand = System.getProperty(SUN_JAVA_COMMAND).split(" ");
+		try {
+			Runtime.getRuntime().exec("java -jar "+ new File(mainCommand[0]).getPath());
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			System.out.println("Restart Failed!");
+			e.printStackTrace();
+		}
+		System.exit(0);
+	}
 }
