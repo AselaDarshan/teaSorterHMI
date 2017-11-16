@@ -2,7 +2,7 @@ package com.Sortex.controller;
 
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.util.ArrayList;
+
 
 
 
@@ -36,8 +36,8 @@ public class AutoCalibration {
 					row = (x-startIndex)/3;
 					System.out.println(row);
 					int r =  Byte.toUnsignedInt(image[x] );
-					int r1 =  Byte.toUnsignedInt(image[x+3] );//right pixel
-					int r2 =  Byte.toUnsignedInt(image[x+width] );//down pixel
+				//	int r1 =  Byte.toUnsignedInt(image[x+3] );//right pixel
+				//	int r2 =  Byte.toUnsignedInt(image[x+width] );//down pixel
 					System.out.println("pixel#: "+((x-startIndex)/3)+" value:"+r);
 					
 					if(nextIsWhite && r >= Constants.MARGIN_THRESHOLD ){
@@ -115,8 +115,8 @@ public class AutoCalibration {
 					row = (x-startIndex)/3;
 					System.out.println(row);
 					int r =  Byte.toUnsignedInt(image[x] );
-					int r1 =  Byte.toUnsignedInt(image[x+3] );//right pixel
-					int r2 =  Byte.toUnsignedInt(image[x+width] );//down pixel
+			//		int r1 =  Byte.toUnsignedInt(image[x+3] );//right pixel
+			//		int r2 =  Byte.toUnsignedInt(image[x+width] );//down pixel
 					System.out.println("pixel "+(x/3)+" "+r);
 					
 					if(r < Constants.MARGIN_THRESHOLD ){

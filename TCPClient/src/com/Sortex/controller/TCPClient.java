@@ -1,23 +1,10 @@
 package com.Sortex.controller;
 
 
-import java.awt.Transparency;
-import java.awt.color.ColorSpace;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-import java.awt.image.BufferedImage;
-import java.awt.image.ColorModel;
-import java.awt.image.ComponentColorModel;
-import java.awt.image.DataBuffer;
-import java.awt.image.DataBufferByte;
-import java.awt.image.Raster;
+
 import java.io.*;
 import java.net.*;
-//import java.util.Timer;
-import java.util.Arrays;
 
-import javax.swing.JDialog;
-import javax.swing.JOptionPane;
 
 
 public class TCPClient {
@@ -440,7 +427,7 @@ public static int getRegValue(int addr){
 	
 	private static void sendDataToCameraThread(byte[] paramBuffer){
 		if(isSendDataEnabled){
-		Thread t = null;
+	//	Thread t = null;
 		
 		 //JOptionPane opt = new JOptionPane("Connection establishment failed. \nRetrying...", JOptionPane.ERROR_MESSAGE, JOptionPane.DEFAULT_OPTION, null, new Object[]{}); // no buttons
 	   // JDialog  dlg = opt.createDialog("Connection Failed !");
@@ -555,10 +542,10 @@ public static int getRegValue(int addr){
 		
 		byte[] _32bitframe = new byte[4];
 
-		for (byte b1 : _32bitframe) {
-			b1 = 0;
-
-		}
+//		for (byte b1 : _32bitframe) {
+//			b1 = 0;
+//
+//		}
 
 		int frameByteCount = 0;
  		int bytesRecived = 0;
@@ -674,10 +661,10 @@ public static int getRegValue(int addr){
 
 		byte[] _32bitframe = new byte[4];
 
-		for (byte b1 : _32bitframe) {
-			b1 = 0;
-
-		}
+//		for (byte b1 : _32bitframe) {
+//			b1 = 0;
+//
+//		}
 		int numberOfFrames= 0;
 		int frameByteCount = 0;
  		int bytesRecived = 0;

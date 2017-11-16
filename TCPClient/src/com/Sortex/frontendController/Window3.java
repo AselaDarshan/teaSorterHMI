@@ -3,7 +3,7 @@ package com.Sortex.frontendController;
 import java.awt.BorderLayout;
 
 import java.awt.Color;
-import java.awt.Component;
+
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
@@ -11,25 +11,20 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Image;
 import java.awt.Insets;
-import java.awt.Label;
+
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
+
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
+
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
-import java.lang.management.ManagementFactory;
-import java.net.URISyntaxException;
-import java.net.UnknownHostException;
-import java.util.ArrayList;
-import java.util.List;
 
-import javax.imageio.ImageIO;
+import java.net.UnknownHostException;
+
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
@@ -43,26 +38,26 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JSlider;
 import javax.swing.JSpinner;
-import javax.swing.JTextArea;
+
 import javax.swing.JTextField;
-import javax.swing.SpinnerModel;
+
 import javax.swing.SpinnerNumberModel;
-import javax.swing.SwingConstants;
+
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import javax.xml.ws.soap.AddressingFeature;
+
 
 import com.Sortex.controller.AutoCalibration;
 
 import com.Sortex.controller.CapturePane;
 
 import com.Sortex.controller.Constants;
-import com.Sortex.controller.Controller;
+
 import com.Sortex.controller.SettingsManager;
 import com.Sortex.controller.StreamCapturer;
 import com.Sortex.controller.TCPClient;
-import com.Sortex.controller.WatchdogTimer;
+
 
 public class Window3 {
 	JPanel container;
@@ -512,7 +507,7 @@ public class Window3 {
 		categoryLabel.setFont(new Font("Arial", Font.BOLD, Constants.TITLE_FONT_SIZE));
 		panel2.add(categoryLabel);
 		
-		categorySelection = new JComboBox();
+		categorySelection = new JComboBox<String>();
 		categorySelection.addItem("OPA");
 		categorySelection.addItem("OP1");
 		categorySelection.addItem("BOP");
@@ -530,16 +525,16 @@ public class Window3 {
 		resetButton = new JButton("Reset");
 		captureButton = new JButton("Capture");
 		restartButton = new JButton("Restart");
-		int[] timeStrings = { 1, 2, 5, 10, 20, 30 };
+		//int[] timeStrings = { 1, 2, 5, 10, 20, 30 };
 
-		JComboBox timeList = new JComboBox();
-		timeList.addItem(1);
-		timeList.addItem(2);
-		timeList.addItem(5);
-		timeList.addItem(10);
-		timeList.addItem(20);
-		timeList.addItem(30);
-		timeList.setSize(5, 10);
+		//JComboBox timeList = new JComboBox<>();
+//		timeList.addItem(1);
+//		timeList.addItem(2);
+//		timeList.addItem(5);
+//		timeList.addItem(10);
+//		timeList.addItem(20);
+//		timeList.addItem(30);
+//		timeList.setSize(5, 10);
 		JLabel noOfFrames = new JLabel("Training Time (Minutes):");
 
 		noOfFrames.setFont(new Font("Arial", Font.BOLD, 20));
@@ -557,7 +552,7 @@ public class Window3 {
 		controls.add(captureButton);
 		controls.add(restartButton);
 		inputLabels.add(noOfFrames);
-		inputField.add(timeList);
+		//inputField.add(timeList);
 		controlinputs.add(inputLabels, BorderLayout.WEST);
 		controlinputs.add(inputField, BorderLayout.CENTER);
 		//panel3.add(controlinputs, BorderLayout.WEST);
@@ -649,7 +644,7 @@ public class Window3 {
 			public void actionPerformed(ActionEvent e) {
 				bG.clearSelection();
 				categorySelection.setSelectedIndex(0);
-				timeList.setSelectedIndex(0);
+//				timeList.setSelectedIndex(0);
 				stem.setEnabled(true);
 				leaf.setEnabled(true);
 				panel5.remove(imgLabel);
@@ -960,10 +955,10 @@ public class Window3 {
 
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				int temp = (int) timeList.getItemAt(timeList.getSelectedIndex());
-				numberOfFrames = temp * 3600;
+			//	int temp = (int) timeList.getItemAt(timeList.getSelectedIndex());
+			//	numberOfFrames = temp * 3600;
 
-				System.out.println(temp);
+			//	System.out.println(temp);
 				//com.Sortex.controller.TCPClient.NUMBER_OF_FRAMES = numberOfFrames;
 
 				
@@ -1010,7 +1005,7 @@ public class Window3 {
 								String[] stringBuffer = new String[3];
 								String line;
 								int i = 0;
-								boolean empty = true;
+								//boolean empty = true;
 
 								if (com.Sortex.controller.TCPClient.status) {
 
@@ -1078,7 +1073,7 @@ public class Window3 {
 								String[] stringBuffer = new String[3];
 								String line;
 								int i = 0;
-								boolean empty = true;
+							//	boolean empty = true;
 
 								if (com.Sortex.controller.TCPClient.status) {
 
@@ -1242,7 +1237,7 @@ public class Window3 {
 	}
 
 	public boolean isLastLine() throws IOException {
-		BufferedReader br = new BufferedReader(new FileReader("../TCPClient/result.txt"));
+		br = new BufferedReader(new FileReader("../TCPClient/result.txt"));
 
 		String lastLine = "";
 
@@ -1372,43 +1367,45 @@ public class Window3 {
 	}
 	
 
-	private Thread createFrameReciveingThread(boolean createWindow) {
-		return new Thread() {
-			
-			public void run() {
-				try {
-					if(isMonitoring){
-						com.Sortex.controller.Controller.stopMonitoring();
-						isMonitoring = false;
-						WatchdogTimer.disable();
-					}
-					else{
-						if(createWindow){
-							com.Sortex.controller.Controller.startMonitoring();
-						}
-						isMonitoring = true;
-						
-						com.Sortex.controller.TCPClient.getFrames("stemRowData",tcpTimeout,-1,false);
-						
-						
-					}
-				} catch (UnknownHostException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-
-			}
-		};
-	}
+//	private Thread createFrameReciveingThread(boolean createWindow) {
+//		return new Thread() {
+//			
+//			public void run() {
+//				try {
+//					if(isMonitoring){
+//						com.Sortex.controller.Controller.stopMonitoring();
+//						isMonitoring = false;
+//						WatchdogTimer.disable();
+//					}
+//					else{
+//						if(createWindow){
+//							com.Sortex.controller.Controller.startMonitoring();
+//						}
+//						isMonitoring = true;
+//						
+//						com.Sortex.controller.TCPClient.getFrames("stemRowData",tcpTimeout,-1,false);
+//						
+//						
+//					}
+//				} catch (UnknownHostException e) {
+//					// TODO Auto-generated catch block
+//					e.printStackTrace();
+//				} catch (IOException e) {
+//					// TODO Auto-generated catch block
+//					e.printStackTrace();
+//				}
+//
+//			}
+//		};
+//	}
 
 	/** 
 	 * Sun property pointing the main class and its arguments. 
 	 * Might not be defined on non Hotspot VM implementations.
 	 */
 	public static final String SUN_JAVA_COMMAND = "sun.java.command";
+
+	private BufferedReader br;
 	public static void restartApplication()  {
 		String[] mainCommand = System.getProperty(SUN_JAVA_COMMAND).split(" ");
 		try {

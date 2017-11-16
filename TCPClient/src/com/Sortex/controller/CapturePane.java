@@ -4,9 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.EventQueue;
 import java.awt.Font;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.PrintStream;
+
 
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -14,7 +12,11 @@ import javax.swing.JTextArea;
 
 public class CapturePane extends JPanel implements Consumer {
 
-    private JTextArea output;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	private JTextArea output;
 
     public CapturePane() {
         setLayout(new BorderLayout());

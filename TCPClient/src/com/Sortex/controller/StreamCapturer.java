@@ -7,12 +7,12 @@ import java.io.PrintStream;
 public class StreamCapturer extends OutputStream {
 
     private StringBuilder buffer;
-    private String prefix;
+  //  private String prefix;
     private Consumer consumer;
     private PrintStream old;
 
     public StreamCapturer(String prefix, Consumer consumer, PrintStream old) {
-        this.prefix = prefix;
+      //  this.prefix = prefix;
         buffer = new StringBuilder(128);
         buffer.append("[").append(prefix).append("] ");
         this.old = old;
