@@ -43,4 +43,8 @@ public class Constants {
 	
 	public final static int MAX_HEIGHT = 150;
 	public final static int BUFFER_SIZE = 300;
+	
+	public final static int RETRY_COUNT = 10;
+	
+	public final static int RESPONSE_TIMEOUT_MILIS = 1000;
 }

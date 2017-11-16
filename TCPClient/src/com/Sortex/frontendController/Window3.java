@@ -594,7 +594,7 @@ public class Window3 {
 					public void run() {
 						TCPClient.tcpReceive = true;
 						System.out.println("starting capture "+numberOfFrames+ " frames");
-						TCPClient.getFramesRealTime(Integer.parseInt(numberOfFrames));
+						TCPClient.getFramesRealTime(Integer.parseInt(numberOfFrames),settingsManager);
 					}
 						
 				
@@ -899,7 +899,7 @@ public class Window3 {
 					}else {
 						isMonitoring = true;
 						TCPClient.tcpReceive = true;
-						TCPClient.getFramesRealTime(0);
+						TCPClient.getFramesRealTime(0,settingsManager);
 					}
 						
 					

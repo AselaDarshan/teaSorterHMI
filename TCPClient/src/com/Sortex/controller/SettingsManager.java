@@ -315,6 +315,7 @@ public class SettingsManager {
 	}
 	
 	public void applySettings(){
+		TCPClient.failedMessagedCount = 0;
 		com.Sortex.controller.TCPClient.sendBackgroundColorParameters(bgThrshold,0,0);
 		com.Sortex.controller.TCPClient.sendStemLeafTresholds(stemLeafThreshold,0,0);
 //		com.Sortex.controller.TCPClient.sendROIX(roiXStart,roiXEnd);
@@ -332,6 +333,13 @@ public class SettingsManager {
 		for(int i=Constants.NUMBER_OF_MARGINS-1;i>=0;i--){
 				com.Sortex.controller.TCPClient.sendMargin(i,marginsArray[i]);
 				
+		}
+		
+		if(TCPClient.failedMessagedCount>0) {
+			JOptionPane.showMessageDialog(null , TCPClient.failedMessagedCount + " setting(s) applying has been failed...","Failed!",1); 
+		}
+		else {
+			JOptionPane.showMessageDialog(null , "All Settings has been applied successfully...","Successfull!",1); 
 		}
 	}
 	

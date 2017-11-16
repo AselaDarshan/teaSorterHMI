@@ -51,6 +51,8 @@ public class TCPClient {
 	static DataOutputStream outToServer;
 	static InputStream in;
 	static DataInputStream dis;
+	static int failedMessagedCount = 0;
+
 	public static boolean status = true;
 	
 	static boolean isRetringMessageShowing = false;
@@ -201,7 +203,7 @@ public class TCPClient {
 		return  Byte.toUnsignedInt(recivedData[0])+ Byte.toUnsignedInt(recivedData[1])*256+ Byte.toUnsignedInt(recivedData[2])*256*256+ Byte.toUnsignedInt(recivedData[3])*256*256*256;
 
 	}
-public static int getRegValue(int addr){
+	public static int getRegValue(int addr){
 		
 		byte[] recivedData;
 		
@@ -311,9 +313,7 @@ public static int getRegValue(int addr){
 	
 		byte[] paramBuffer = new byte[4];
 		paramBuffer[3] = toByte(HEADER_BACKGORUND_THRESHOLD);
-//		paramBuffer[2] = toByte(_R);
-//		paramBuffer[1] = toByte(_G);
-//		paramBuffer[0] = toByte(_B);
+
 		paramBuffer[2] = toByte(0);
 		paramBuffer[1] = toByte(_R/256);
 		paramBuffer[0] = toByte(_R%256);
@@ -410,27 +410,28 @@ public static int getRegValue(int addr){
 	}
 
 	
-	private static  void sendDataToCamera(byte[] paramBuffer){
-		Thread t = new Thread(new Runnable(){
-			public void run(){
+	private static void sendDataToCamera(byte[] paramBuffer){
+		
+//		Thread t = new Thread(new Runnable(){
+//			public void run(){
 				sendDataToCameraThread(paramBuffer);
-			}
-    	});
-		t.start();
-		try {
-			Thread.sleep(10);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+//			}
+//    		});
+//		t.start();
+//		try {
+//			Thread.sleep(10);
+//		} catch (InterruptedException e) {
+//			
+//		}
 	}
 	
 	private static void sendDataToCameraThread(byte[] paramBuffer){
-		if(isSendDataEnabled){
-	//	Thread t = null;
-		
-		 //JOptionPane opt = new JOptionPane("Connection establishment failed. \nRetrying...", JOptionPane.ERROR_MESSAGE, JOptionPane.DEFAULT_OPTION, null, new Object[]{}); // no buttons
-	   // JDialog  dlg = opt.createDialog("Connection Failed !");
+		int retryCount = 0;
+		int waitingTime =0;
+		if(!isSendDataEnabled){
+			System.out.println("TCP disabled!");
+			return;
+		}
 		do{
 			System.out.print("sending "+paramBuffer.length+" bytes:");
 			for(int i=0;i<paramBuffer.length;i++) {
@@ -440,58 +441,56 @@ public static int getRegValue(int addr){
 			if(buildServerConnection()){
 				try {
 					outToServer.write(paramBuffer);
+					byte[] response= new byte[4];
+					while(dis.available()<4) {
+						Thread.sleep(10);
+						waitingTime++;
+						if(waitingTime>Constants.RESPONSE_TIMEOUT_MILIS/10) {
+							System.out.println("Timeout while waiting for response!");
+							//if timeout occurred stop waiting for response
+							clientSocket.close();
+							continue;
+						}
+					}
+					int recivedCount = dis.read(response,0,4);
+					if(recivedCount>0) {
+						//response received
+						int resCode = Byte.toUnsignedInt(response[0]) + Byte.toUnsignedInt(response[1])*256+ Byte.toUnsignedInt(response[2])*256*256+ Byte.toUnsignedInt(response[2])*256*256*256;
+						if(resCode == 0) {
+							//success response
+							System.out.println("Setting success!");
+							
+							return;
+						}
+						else {
+							//failed response
+							System.out.println("Setting failed!");
+						}
+					}
+					else {
+						System.out.println("No response received!");
+					}
 					clientSocket.close();
 					
-					if(isRetringMessageShowing){
-						isRetringMessageShowing = false;
-						System.out.println("Successfully Connected to the camera...");
-						//dlg.dispose();
-						//JOptionPane.showMessageDialog(null , "Successfully Connected to the Camera...","Connected!",1); 
-			        	
-					}
-					
+						
 				} catch (IOException e) {
-				//	JOptionPane.showMessageDialog(null , "Connection error!");
 					System.out.println("Connection error!");
-					
-				
-					e.printStackTrace();
-				
+				} catch (InterruptedException e) {
+					System.out.println("Connection error!");
 				} 
 			}
-			else{
-				if(!isRetringMessageShowing){
-				     
-				//	isRetringMessageShowing = true;
-				//	t = new Thread(new Runnable(){
-				//		public void run(){
-							 //dlg.setVisible(true);
-							 //dlg.addWindowListener(new WindowAdapter() {
-							//	    @Override
-							//	    public void windowClosed(WindowEvent e) {
-							//	        isRetringMessageShowing = false;
-							//	        retryingCancelled = true;
-							//	        System.out.println("retrying window closed");
-							//	    }
-							//	});
-			        		//JOptionPane.showMessageDialog(null , "Connection establishment failed. \nRetrying...","Connection Failed !",0); 
-			        	//}
-			    	//});
-				//t.start();
-				
-			  
-				}
-				try {
-					Thread.sleep(2000);
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}				
-			
-				
+			else {
+				System.out.println("Connection failed!");
 			}
-		}while(isRetringMessageShowing&&!retryingCancelled);
-		}
+			retryCount++;
+			System.out.println("Retrying..");
+		}while(retryCount<Constants.RETRY_COUNT);
+		
+		System.out.println("Sending faild!. stoped retrying after "+Constants.RETRY_COUNT+ " attempts");
+		failedMessagedCount ++;
+		
+		
+		//JOptionPane.showMessageDialog(null , "Successfully Connected to the Camera...","Connected!",1); 
 	}
 	
 	private static byte[] getDataFromCamera(byte[] paramBuffer,int numberOfBytes){
@@ -652,7 +651,7 @@ public static int getRegValue(int addr){
 		status = true;
 	}
 	
-	public static int getFramesRealTime(int frameCount) {
+	public static int getFramesRealTime(int frameCount,SettingsManager settingsManager) {
 		
 		if(!isSendDataEnabled){
 			System.out.println("communication is disabled");
@@ -670,7 +669,7 @@ public static int getRegValue(int addr){
  		int bytesRecived = 0;
 		int bytesRead = 0;
 		long startTime = System.nanoTime();
-		SettingsManager settingsManager =  new SettingsManager();
+		 
 		settingsManager.retriveSettingsFromCamera();
 		
 		int width = settingsManager.getFrameWidth();
@@ -691,10 +690,15 @@ public static int getRegValue(int addr){
 
 		byte[] byteBuf = new byte[bytesPerFrame];
 		
-		
-		Viewer viewer = new Viewer();
-		viewer.initialize();
+		Viewer viewer = null;
+		if(frameCount>0) {
+			
+		}
+		else {
+			viewer = new Viewer();
+			viewer.initialize();
 
+		}
 		Thread.currentThread().setPriority(Thread.MAX_PRIORITY);
 		tcpReceive = true;
 		
@@ -778,7 +782,35 @@ public static int getRegValue(int addr){
 			System.out.println("IOException at connection close");
 			returnValue =  -2;
 		}
-		viewer.close();
+		if(frameCount>0) {
+			PrintWriter writer;
+			try {
+				writer = new PrintWriter(Constants.SNAPSHOT_SAVE_FOLDER+"/details.txt", "UTF-8");
+				writer.println("Number of frames:\t"+frameCount);
+				writer.println("BG threshold:\t"+settingsManager.getBgThrshold());
+				writer.println("S/L threshold:\t"+settingsManager.getStemLeafThreshold());
+				writer.println("Certainty:\t"+settingsManager.getCertantity());
+				writer.println("Min Count:\t"+settingsManager.getMinStemCount());
+				writer.println("Width:\t"+settingsManager.getFrameWidth());
+				writer.println("Height:\t"+settingsManager.getFrameHeight());
+				writer.println("\nMargins");
+				int[] marginArray = settingsManager.getMarginsArray();
+				for(int i=0;i<Constants.NUMBER_OF_MARGINS;i++) {
+					writer.println(i+":\t"+marginArray[i]);
+				}
+				writer.close();
+				System.out.println("detail file write successful! ");
+			} catch (FileNotFoundException e) {
+				System.out.println("detail file write failed! "+e.getMessage());
+			} catch (UnsupportedEncodingException e) {
+				System.out.println("detail file write failed! "+e.getMessage());
+			}
+			
+		}
+		else {
+		 viewer.close();
+		}
+		
 		System.out.println("Realtime frame receiving ended");
 	
 		return returnValue;
