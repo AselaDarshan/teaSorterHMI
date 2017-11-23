@@ -47,10 +47,7 @@ public class Window2 {
 		 * camera status panel
 		 **************************************************/
 		JPanel cameraStatusPanel = new JPanel(new GridBagLayout());
-//		GridBagConstraints gbc = new GridBagConstraints();
-//		gbc.insets = new Insets(6, 6, 6, 6);
-//		gbc.gridwidth = GridBagConstraints.REMAINDER;
-//		gbc.fill = GridBagConstraints.VERTICAL;
+
 
 		JPanel framePeriodPanel = new JPanel(new GridBagLayout());
 		

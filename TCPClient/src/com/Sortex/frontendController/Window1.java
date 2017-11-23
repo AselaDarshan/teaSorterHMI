@@ -83,7 +83,6 @@ public class Window1 {
 		panel4 = window3.createTestPanel(settingsManger);
 		
 		
-		window3.setValues(settingsManger);
 		frame.setSize(800, 480);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		jtp.addTab("Settings", panel4);

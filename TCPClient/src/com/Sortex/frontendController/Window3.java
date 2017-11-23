@@ -3,7 +3,7 @@ package com.Sortex.frontendController;
 import java.awt.BorderLayout;
 
 import java.awt.Color;
-
+import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
@@ -14,16 +14,16 @@ import java.awt.Insets;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.BufferedReader;
 import java.io.File;
 
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
+
 import java.io.PrintStream;
 
-import java.net.UnknownHostException;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
@@ -31,6 +31,7 @@ import javax.swing.ButtonGroup;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -42,7 +43,7 @@ import javax.swing.JSpinner;
 import javax.swing.JTextField;
 
 import javax.swing.SpinnerNumberModel;
-
+import javax.swing.WindowConstants;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -78,8 +79,8 @@ public class Window3 {
 	JButton autoThresholdingButton;
 	JSlider sensitivitySlider;
 	JLabel sensitivity ;
-	JButton saveButton = new JButton("Save Settings");
-	JButton applyButton = new JButton("Apply Settings");
+	JButton saveButton = new JButton("Save");
+	JButton applyButton = new JButton("Apply");
 	JSpinner delayGranulatySpinner,roiXStartSpinner,roiXEndSpinner,roiYStartSpinner,roiYEndSpinner;
 	JSpinner ejectDurationSpinner,delayStepsSpinner;
 	JSlider stemLeafThresholdSlider, backgroundThresholdSlider;
@@ -131,6 +132,10 @@ public class Window3 {
 	private JButton captureButton;
 
 	private JButton restartButton;
+
+	private JButton captureAndFreezeButton;
+
+	private JButton resumeButton;
 	
 	public JPanel createTestPanel(SettingsManager settingsManager) {
 		
@@ -243,7 +248,6 @@ public class Window3 {
 	        @Override
 	        public void stateChanged(ChangeEvent e) {
 	            
-//	            System.out.println(delayGranulatySpinner.getValue());
 	          
 					settingsManager.setMinStemCount((int)minCountSpinner.getValue());	
 	        }
@@ -252,14 +256,7 @@ public class Window3 {
 		/********************camera setting panel************************************/
 		cameraSettingPanel = new JPanel(new GridBagLayout());
 		cameraSettingApplyButton =  new JButton("Apply");
-		
-//		delaySettingPanel = new JPanel(new GridBagLayout());
-//		GridBagConstraints gbc = new GridBagConstraints();
-//		gbc.insets = new Insets(6, 6, 6, 6);
-//		gbc.gridwidth = GridBagConstraints.REMAINDER;
-//		gbc.fill = GridBagConstraints.VERTICAL;
 
-		
 		
 		TitledBorder cameraSettingBorder = new TitledBorder("Camera Settings");
 		cameraSettingBorder.setTitleFont(new Font("Arial", Font.BOLD, Constants.PANEL_TITLE_FONT_SIZE));
@@ -522,19 +519,16 @@ public class Window3 {
 		panel3 = new JPanel(new BorderLayout(10, 10));
 		startButton = new JButton("Train");
 		monitorButton = new JButton("Live View");
-		resetButton = new JButton("Reset");
+		
 		captureButton = new JButton("Capture");
+		captureAndFreezeButton = new JButton("Cap & Freeze");
+		captureAndFreezeButton.setBackground(new Color(60, 10, 35));
+		captureAndFreezeButton.setOpaque(true);
+		resumeButton = new JButton("Resume Cap");
+		resumeButton.setBackground(new Color(20, 80, 35));
+		resumeButton.setOpaque(true);
 		restartButton = new JButton("Restart");
-		//int[] timeStrings = { 1, 2, 5, 10, 20, 30 };
 
-		//JComboBox timeList = new JComboBox<>();
-//		timeList.addItem(1);
-//		timeList.addItem(2);
-//		timeList.addItem(5);
-//		timeList.addItem(10);
-//		timeList.addItem(20);
-//		timeList.addItem(30);
-//		timeList.setSize(5, 10);
 		JLabel noOfFrames = new JLabel("Training Time (Minutes):");
 
 		noOfFrames.setFont(new Font("Arial", Font.BOLD, 20));
@@ -544,13 +538,15 @@ public class Window3 {
 		JPanel controlinputs = new JPanel(new BorderLayout());
 		JPanel controls = new JPanel();
 		
-		controls.add(startButton);
+	//	controls.add(startButton);
 		controls.add(saveButton);
 		controls.add(applyButton);
 		//controls.add(resetButton);
 		controls.add(monitorButton);
 		controls.add(captureButton);
-		controls.add(restartButton);
+		controls.add(captureAndFreezeButton);
+		controls.add(resumeButton);
+	//	controls.add(restartButton);
 		inputLabels.add(noOfFrames);
 		//inputField.add(timeList);
 		controlinputs.add(inputLabels, BorderLayout.WEST);
@@ -560,14 +556,43 @@ public class Window3 {
 		startButton.setOpaque(true);
 		monitorButton.setBackground(new Color(6, 104, 135));
 		monitorButton.setOpaque(true);
-		resetButton.setBackground(Color.red);
+		
 		captureButton.setBackground(new Color(6, 54, 35));
 		captureButton.setOpaque(true);
 		restartButton.setBackground(new Color(120, 54, 35));
 		restartButton.setOpaque(true);
 
-		
-		
+		captureAndFreezeButton.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) 
+			{
+				Thread tcpThread = new Thread() {
+					public void run() {
+						TCPClient.sendCapAndFreeze();
+						showCaptureAndFreezeProgress(settingsManager);
+					}
+				};
+				tcpThread.start();
+					
+			
+			}
+		});
+		resumeButton.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) 
+			{
+				Thread tcpThread = new Thread() {
+					public void run() {
+					TCPClient.sendResumeCap();
+					settingsManager.setCaptureLimit(-1);
+					}
+				};
+				tcpThread.start();
+			
+			}
+		});
 		restartButton.addActionListener(new ActionListener() {
 
 			@Override
@@ -583,7 +608,15 @@ public class Window3 {
 			JFrame frame = new JFrame("Capture frames");
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				 String numberOfFrames = JOptionPane.showInputDialog(frame, "Number of frames to capture");
+				int captureLimit = settingsManager.getCaptureLimit();
+				String msg = "";
+				if(captureLimit == -1) {
+					msg = "Continuos Capture is enabled. ";
+				}
+				else {
+					msg = "Frame buffer size: "+captureLimit;
+				}
+				 String numberOfFrames = JOptionPane.showInputDialog(frame, msg+"\nNumber of frames to capture");
 				
 				if(thread2!=null){
 					TCPClient.tcpReceive = false;
@@ -593,8 +626,17 @@ public class Window3 {
 				thread2 = new Thread() {
 					public void run() {
 						TCPClient.tcpReceive = true;
-						System.out.println("starting capture "+numberOfFrames+ " frames");
-						TCPClient.getFramesRealTime(Integer.parseInt(numberOfFrames),settingsManager);
+						
+						try {
+							if(numberOfFrames != null) {
+								int number = Integer.parseInt(numberOfFrames);
+								System.out.println("starting capture "+numberOfFrames+ " frames");
+								TCPClient.getFramesRealTime(number,settingsManager);
+							}
+							
+						}catch(java.lang.NumberFormatException e) {
+							System.out.println("Invalid input");
+						}
 					}
 						
 				
@@ -603,82 +645,9 @@ public class Window3 {
 			}
 		});
 				
-//			@Override
-//			public void actionPerformed(ActionEvent e) {
-//				JFrame frame = new JFrame("Capture frames");
-//				    	
-//			    	Thread thread2;
-//
-//			
-//						
-//				thread2 = new Thread() {
-//					  // prompt the user to enter their name
-//				    String numberOfFrames = JOptionPane.showInputDialog(frame, "Number of frames to capture");
-//				   
-//					public void run() {
-//						System.out.println("starting capture "+numberOfFrames+ " frames");
-//						try {
-//							
-//							TCPClient.getFrames(Constants.SNAPSHOT_SAVE_FOLDER, 3, Integer.parseInt(numberOfFrames),true);
-//							
-//						} catch (NumberFormatException e1) {
-//							// TODO Auto-generated catch block
-//							System.out.println("invalid number");
-//						} catch (IOException e1) {
-//							// TODO Auto-generated catch block
-//							System.out.println("Capture failed due to connection error");
-//						}
-//
-//					}
-//				};
-//				thread2.start();
-//				   
-//				
-//					
-//				}
-//			});
-		// reset button functions
-		resetButton.addActionListener(new ActionListener() {
 
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				bG.clearSelection();
-				categorySelection.setSelectedIndex(0);
-//				timeList.setSelectedIndex(0);
-				stem.setEnabled(true);
-				leaf.setEnabled(true);
-				panel5.remove(imgLabel);
-				panel5.validate();
-				panel5.repaint();
+	
 
-				sensitivitySlider.setValue(0);
-				type = null;
-				category = null;
-				cleanDirectory("../TCPClient/stemRowData");
-
-				cleanDirectory("../TCPClient/leafRowData");
-
-				cleanDirectory("../TCPClient/testInStem");
-				cleanDirectory("../TCPClient/testInLeaf");
-
-			}
-		});
-//		statistics.addActionListener(new ActionListener() {
-//
-//			String path = "../TCPClient/TrainingModule/Stats";
-//
-//			@Override
-//			public void actionPerformed(ActionEvent arg0) {
-//
-//				try {
-//					display(path);
-//				} catch (IOException e) {
-//					// TODO Auto-generated catch block
-//					e.printStackTrace();
-//				}
-//
-//			}
-//		});
 		saveButton.addActionListener(new ActionListener() {
 
 			
@@ -699,29 +668,7 @@ public class Window3 {
 			}
 		});
 		
-//		result.addActionListener(new ActionListener() {
-//
-//			@Override
-//			public void actionPerformed(ActionEvent arg0) {
-//
-//				String path = null;
-//				if (stem.isSelected()) {
-//					path = "../TCPClient/TrainingModule/testOutStem";
-//				}
-//				if (leaf.isSelected()) {
-//					path = "../TCPClient/TrainingModule/testOutStem";
-//				}
-//
-//				try {
-//					display(path);
-//				} catch (IOException e) {
-//
-//					e.printStackTrace();
-//				}
-//				// runexe(path);
-//
-//			}
-//		});
+
 
 		/*******************************************
 		 * panel 4
@@ -888,256 +835,35 @@ public class Window3 {
 				
 				if(thread2!=null){
 					TCPClient.tcpReceive = false;
-					thread2.interrupt();
+//					thread2.interrupt();
 				}
 				
 				thread2 = new Thread() {
 					public void run() {
-					if(isMonitoring) {
-						TCPClient.tcpReceive = false;
-						isMonitoring = false;
-					}else {
-						isMonitoring = true;
-						TCPClient.tcpReceive = true;
-						TCPClient.getFramesRealTime(0,settingsManager);
+						if(isMonitoring) {
+							TCPClient.tcpReceive = false;
+							isMonitoring = false;
+						}else {
+							isMonitoring = true;
+							TCPClient.tcpReceive = true;
+							TCPClient.getFramesRealTime(0,settingsManager);
+						}	
 					}
-						
-					
-					}
+				};
+				thread2.start();
 				
-			};
-			thread2.start();
-				
-			
-//				thread2 = createFrameReciveingThread(true);
-//				thread2.start();
-//				
-//				Thread watchdogThread =  new Thread() {
-//					public void run() {
-//						
-//						while(WatchdogTimer.isEnabled()) {
-//							try {
-//								WatchdogTimer.start();
-//								Thread.sleep(Constants.WATCHDOG_TIMEOUT);
-//								System.out.println("Checking watchdog timer");
-//								if(!WatchdogTimer.isRested() && WatchdogTimer.isEnabled()) {
-//									System.out.println("Frame receiver is not responding. restarting...");
-//									
-//									thread2.interrupt();
-//									
-//									isMonitoring = false;
-//									thread2 = createFrameReciveingThread(false);
-//									thread2.start();
-//									
-//								}
-//								
-//							} catch (InterruptedException e) {
-//								
-//							}
-//							
-//						}
-//					}
-//				};
-//				
-//				WatchdogTimer.enable();
-//				watchdogThread.start();
-//					
-//				
+	
 			}
 		});
 
 						
 					
 				
-			
-		startButton.addActionListener(new ActionListener() {
-			Thread thread2;
-
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-			//	int temp = (int) timeList.getItemAt(timeList.getSelectedIndex());
-			//	numberOfFrames = temp * 3600;
-
-			//	System.out.println(temp);
-				//com.Sortex.controller.TCPClient.NUMBER_OF_FRAMES = numberOfFrames;
-
-				
-
-				if (bG.getSelection() == null) {
-
-					JOptionPane.showMessageDialog(null, "Please Fill all the details");
-					
-					
-				} else {
-					Thread thread = new Thread() {
-						public void run() {
-							long startTime = System.currentTimeMillis();
-							panel5.add(imgLabel, BorderLayout.PAGE_START);
-							panel5.validate();
-							panel5.repaint();
-							while (System.currentTimeMillis() < startTime + (1 * 60000))
-								;
-
-							panel5.remove(imgLabel);
-							panel5.validate();
-							panel5.repaint();
-							
-							JOptionPane.showMessageDialog(null , "Training is Completed ....");
-
-						}
-					};
-					thread.start();
-
-					if (stem.isSelected()) {
-						thread2 = new Thread() {
-							public void run() {
-								try {
-									System.out.println("get stem images");
-									com.Sortex.controller.TCPClient.getFrames("stemRowData",tcpTimeout,-1,false);
-								} catch (UnknownHostException e) {
-
-									e.printStackTrace();
-								} catch (IOException e) {
-
-									e.printStackTrace();
-								}
-								BufferedReader br = null;
-								String[] stringBuffer = new String[3];
-								String line;
-								int i = 0;
-								//boolean empty = true;
-
-								if (com.Sortex.controller.TCPClient.status) {
-
-									panel5.remove(imgLabel);
-									panel5.validate();
-									panel5.repaint();
-									thread.interrupt();
-									thread2.interrupt();
-									runexe("../TCPClient/TraningModule/Sorter/for_Testing/Sorter.exe");
-
-									try {
-										br = new BufferedReader(new FileReader("../TCPClient/result.txt"));
-
-
-										while ((line = br.readLine()) != null) {
-											stringBuffer[i++] = line;
-										}
-										String[] rgbBackGround = stringBuffer[0].split(",");
-										String[] rgbStringAndLeaf = stringBuffer[1].split(",");
-										// System.out.println(rgbBackGround[2]+"========");
-										int R = Integer.parseInt(rgbBackGround[0]);
-										int G = Integer.parseInt(rgbBackGround[1]);
-										int B = Integer.parseInt(rgbBackGround[2]);
-										int Rx = Integer.parseInt(rgbStringAndLeaf[0]);
-										int Gx = Integer.parseInt(rgbStringAndLeaf[1]);
-										int Bx = Integer.parseInt(rgbStringAndLeaf[2]);
-										
-										com.Sortex.controller.TCPClient.sendBackgroundColorParameters(R, G, B);
-										long startTimex = System.currentTimeMillis();
-										while (System.currentTimeMillis() < startTimex + (200))
-											;
-										
-										com.Sortex.controller.TCPClient.sendBackgroundColorParameters(Rx, Gx, Bx);
-										startTimex = System.currentTimeMillis();
-										while (System.currentTimeMillis() < startTimex + (200))
-											;
-										com.Sortex.controller.TCPClient.sendSensitivityParams(50);
-									} catch (IOException e) {
-
-										e.printStackTrace();
-									}
-
-								}
-
-							}
-						};
-						thread2.start();
-
-					}
-					if (leaf.isSelected()) {
-						thread2 = new Thread() {
-							public void run() {
-								try {
-									System.out.println("get leaf images");
-									com.Sortex.controller.TCPClient.getFrames("leafRowData",tcpTimeout,-1,false);
-								} catch (UnknownHostException e) {
-
-									e.printStackTrace();
-								} catch (IOException e) {
-
-									e.printStackTrace();
-								}
-
-								BufferedReader br = null;
-								String[] stringBuffer = new String[3];
-								String line;
-								int i = 0;
-							//	boolean empty = true;
-
-								if (com.Sortex.controller.TCPClient.status) {
-
-									panel5.remove(imgLabel);
-									panel5.validate();
-									panel5.repaint();
-									thread.interrupt();
-									thread2.interrupt();
-									runexe("../TCPClient/TraningModule/Sorter/for_Testing/Sorter.exe");
-
-									try {
-										br = new BufferedReader(new FileReader("../TCPClient/config.txt"));
-										// while (br.readLine() == null ||
-										// (!isLastLine()))
-										// ;
-
-										while ((line = br.readLine()) != null) {
-											stringBuffer[i++] = line;
-										}
-										String[] rgbBackGround = stringBuffer[0].split(",");
-										String[] rgbStringAndLeaf = stringBuffer[1].split(",");
-										// System.out.println(rgbBackGround[2]+"========");
-										int R = Integer.parseInt(rgbBackGround[0]);
-										int G = Integer.parseInt(rgbBackGround[1]);
-										int B = Integer.parseInt(rgbBackGround[2]);
-										com.Sortex.controller.TCPClient.sendBackgroundColorParameters(R, G, B);
-										long startTimex = System.currentTimeMillis();
-										while (System.currentTimeMillis() < startTimex + (200))
-											;
-										int Rx = Integer.parseInt(rgbStringAndLeaf[0]);
-										int Gx = Integer.parseInt(rgbStringAndLeaf[1]);
-										int Bx = Integer.parseInt(rgbStringAndLeaf[2]);
-										com.Sortex.controller.TCPClient.sendBackgroundColorParameters(Rx, Gx, Bx);
-										startTimex = System.currentTimeMillis();
-										while (System.currentTimeMillis() < startTimex + (200))
-											;
-										com.Sortex.controller.TCPClient.sendSensitivityParams(50);
-									} catch (IOException e) {
-										e.printStackTrace();
-									}
-
-								}
-
-							}
-						};
-						thread2.start();
-
-					}
-
-				}
-
-			}
-		});
-
-//		container.add(panel1, new GridBagConstraints(1, 0, 1, 1, 1, 1, GridBagConstraints.WEST, GridBagConstraints.BOTH,
-//				new Insets(2, 2, 2, 2), 0, 0));
+	
 		container.add(thresholdPanel, new GridBagConstraints(0, 0, 2, 1, 1, 0.9, GridBagConstraints.WEST, GridBagConstraints.BOTH,new Insets(2, 2, 2, 2), 0, 0));
-//		container.add(panel2, new GridBagConstraints(0, 1, 1, 1, 1, 1, GridBagConstraints.WEST, GridBagConstraints.BOTH,	new Insets(2, 2, 2, 2), 0, 0));
-		container.add(delaySettingPanel, new GridBagConstraints(0, 1, 2, 1, 1, 0.9, GridBagConstraints.WEST,GridBagConstraints.BOTH, new Insets(2, 2, 2, 2), 0, 0));
-//		container.add(panel3, new GridBagConstraints(0, 3, 2, 1, 1, 1, GridBagConstraints.WEST, GridBagConstraints.BOTH,new Insets(2, 2, 2, 2), 5, 5));
-		
 
-//		container.add(panel5, new GridBagConstraints(0, 4, 2, 1, 1, 1, GridBagConstraints.WEST, GridBagConstraints.BOTH,
-//				new Insets(2, 2, 2, 2), 0, 0));
+		container.add(delaySettingPanel, new GridBagConstraints(0, 1, 2, 1, 1, 0.9, GridBagConstraints.WEST,GridBagConstraints.BOTH, new Insets(2, 2, 2, 2), 0, 0));
+
 		container.add(cameraSettingPanel, new GridBagConstraints(0, 3, 2, 1, 1, 0.9, GridBagConstraints.WEST, GridBagConstraints.BOTH,new Insets(2, 2, 2, 2), 0, 0));
 		container.add(panel5, new GridBagConstraints(1, 5, 1, 1, 0.2, 0.9, GridBagConstraints.WEST, GridBagConstraints.BOTH,new Insets(2, 2, 2, 2), 0, 0));
 		container.add(panel4, new GridBagConstraints(0, 4, 1, 1, 4, 0.9, GridBagConstraints.WEST, GridBagConstraints.BOTH,new Insets(2, 2, 2, 2), 0, 0));
@@ -1154,42 +880,42 @@ public class Window3 {
           
 		try {
 			
-		backgroundThresholdSlider.setValue(settingsManager.getBgThrshold());
-		Thread.sleep(5);
-		stemLeafThresholdSlider.setValue(settingsManager.getStemLeafThreshold());
-		Thread.sleep(5);
-		sensitivitySlider.setValue(settingsManager.getCertantity());
-		Thread.sleep(5);
-		minCountSpinner.setValue(settingsManager.getMinStemCount());
-		Thread.sleep(5);
-		delayGranulatySpinner.setValue(settingsManager.getDelayGranularity());
-		Thread.sleep(5);
-		delayStepsSpinner.setValue(settingsManager.getEjectDelaySteps());
-		Thread.sleep(5);
-		ejectDurationSpinner.setValue(settingsManager.getEjectorOndelaySteps());
-		Thread.sleep(5);
-		//roiXStartSpinner.setValue(settingsManager.getRoiXStart());
-		//roiXEndSpinner.setValue(settingsManager.getRoiXEnd());
-
-		roiYStartSpinner.setValue(settingsManager.getRoiYStart());
-		Thread.sleep(5);
-		roiYEndSpinner.setValue(settingsManager.getRoiYEnd());
-		Thread.sleep(5);
-		muxSpinner.setValue(settingsManager.getMux());
-		Thread.sleep(5);
-		exposureTimeSpinner.setValue(settingsManager.getExposureTime());
-		Thread.sleep(5);
-		frameLengthSpinner.setValue(settingsManager.getFrameLength());
-		Thread.sleep(5);
-		
-		marginValueArray = settingsManager.getMarginsArray();
-		Thread.sleep(5);
-		for(int i=Constants.NUMBER_OF_MARGINS-1;i>=0;i--){
-			marginIdSelector.setSelectedIndex(i);
-			marginSpinner.setValue(marginValueArray[i]);
+			backgroundThresholdSlider.setValue(settingsManager.getBgThrshold());
 			Thread.sleep(5);
-		}
-		
+			stemLeafThresholdSlider.setValue(settingsManager.getStemLeafThreshold());
+			Thread.sleep(5);
+			sensitivitySlider.setValue(settingsManager.getCertantity());
+			Thread.sleep(5);
+			minCountSpinner.setValue(settingsManager.getMinStemCount());
+			Thread.sleep(5);
+			delayGranulatySpinner.setValue(settingsManager.getDelayGranularity());
+			Thread.sleep(5);
+			delayStepsSpinner.setValue(settingsManager.getEjectDelaySteps());
+			Thread.sleep(5);
+			ejectDurationSpinner.setValue(settingsManager.getEjectorOndelaySteps());
+			Thread.sleep(5);
+			//roiXStartSpinner.setValue(settingsManager.getRoiXStart());
+			//roiXEndSpinner.setValue(settingsManager.getRoiXEnd());
+	
+			roiYStartSpinner.setValue(settingsManager.getRoiYStart());
+			Thread.sleep(5);
+			roiYEndSpinner.setValue(settingsManager.getRoiYEnd());
+			Thread.sleep(5);
+			muxSpinner.setValue(settingsManager.getMux());
+			Thread.sleep(5);
+			exposureTimeSpinner.setValue(settingsManager.getExposureTime());
+			Thread.sleep(5);
+			frameLengthSpinner.setValue(settingsManager.getFrameLength());
+			Thread.sleep(5);
+			
+			marginValueArray = settingsManager.getMarginsArray();
+			Thread.sleep(5);
+			for(int i=Constants.NUMBER_OF_MARGINS-1;i>=0;i--){
+				marginIdSelector.setSelectedIndex(i);
+				marginSpinner.setValue(marginValueArray[i]);
+				Thread.sleep(5);
+			}
+			
 		} catch (InterruptedException e1) {
 			// TODO Auto-generated catch block
 			System.out.println("set setting values failed");
@@ -1198,34 +924,7 @@ public class Window3 {
 		return container;
 	}
 
-	public void runexe(String commandline) {
-
-		try {
-			String line;
-			Process p = Runtime.getRuntime().exec(commandline);
-			BufferedReader input = new BufferedReader(new InputStreamReader(p.getInputStream()));
-			while ((line = input.readLine()) != null) {
-				System.out.println(line);
-			}
-			input.close();
-		} catch (Exception err) {
-			err.printStackTrace();
-		}
-	}
-
-	public void cleanDirectory(String folderName) {
-
-		final File dir = new File(folderName);
-		String msg = "Folder" + folderName + " Does not exists";
-
-		if (!dir.exists()) {
-			JOptionPane.showMessageDialog(null, msg);
-		}
-		for (File file : dir.listFiles()) {
-			if (!file.isDirectory())
-				file.delete();
-		}
-	}
+	
 
 	public JSlider getSlider(int min, int max, int init, int mjrTkSp, int mnrTkSp) {
 		JSlider slider = new JSlider(JSlider.HORIZONTAL, min, max, init);
@@ -1357,14 +1056,7 @@ public class Window3 {
 		return listOfFiles;
 	}
 	
-	public void setValues(SettingsManager settingsManger){
-		
-		settingsManger.retriveSavedSettings();
-		
-		bgThrsholdValueLabel.setText(String.valueOf(settingsManger.getBgThrshold()));
-		slThrsholdValueLabel.setText(String.valueOf(settingsManger.getStemLeafThreshold()));
-		sensitivityValueLabel.setText(String.valueOf(settingsManger.getCertantity()));
-	}
+	
 	
 
 //	private Thread createFrameReciveingThread(boolean createWindow) {
@@ -1416,5 +1108,48 @@ public class Window3 {
 			e.printStackTrace();
 		}
 		System.exit(0);
+	}
+	
+	public void showCaptureAndFreezeProgress(SettingsManager settingsManager) {
+		
+		
+		 JOptionPane opt = new JOptionPane("Capturing frames...", JOptionPane.WARNING_MESSAGE, JOptionPane.DEFAULT_OPTION, null, new Object[]{}); // no buttons
+     	  final JDialog dlg = opt.createDialog("Capturing");
+    
+	    
+	    new Thread(new Runnable()
+	          {
+	            public void run()
+	            {
+	            		int isDone = 0;
+	              try
+	              {
+	            	 
+	          	  
+	          	  
+	          	  
+	          	  System.out.println("geting isDone");
+	            	  while(isDone == 0) {
+	                Thread.sleep(1000);
+	                isDone = TCPClient.getIsDone();
+	                System.out.println("capturing.. "+isDone);
+	               
+	               
+	            	  }
+	            	 
+	            		  System.out.println("captured "+isDone+ " frames");
+	            	  
+	            	  settingsManager.setCaptureLimit(isDone);
+	            	  dlg.dispose();
+	              }
+	              
+	              catch ( Throwable th )
+	              {
+	               
+	              }
+	            }
+	          }).start();
+	    dlg.setVisible(true);
+	   
 	}
 }

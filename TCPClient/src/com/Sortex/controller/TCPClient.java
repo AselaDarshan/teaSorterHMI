@@ -13,7 +13,7 @@ public class TCPClient {
 	final static int NUMBER_OF_BYTES_PER_LINE = 100*4;// 6 bytes
 	final static int NUMBER_OF_LINES_PER_FRAME = 100;
 	final static int NUMBER_OF_BYTES_PER_FRAME = NUMBER_OF_BYTES_PER_LINE * NUMBER_OF_LINES_PER_FRAME;
-//	public static int numberOfFrames;
+
 	final static int HEADER_BACKGORUND_THRESHOLD = 0x0F;
 	final static int HEADER_STEM_LEAF_THRESHOLD = 0x10;
 	final static int HEADER_MONITOR_ON = 160;
@@ -28,6 +28,9 @@ public class TCPClient {
 	final static int HEADER_MARGIN = 0x0A; 
 	final static int HEADER_MUX =0x19; 
 	final static int HEADER_MIN_STEM_COUNT =0x11; 
+	final static int HEADER_CAPTURE_AND_FREEZE = 0x37; 
+	final static int HEADER_RESUME_CONTINUOUS_CAPTURE = 0x38; 
+	final static int HEADER_IS_DONE = 0x39;
 	
 	
 	
@@ -46,7 +49,6 @@ public class TCPClient {
 	final static int HEADER_GET_REG_VALUE = 50;
 	final static int HEADER_SET_REG_VALUE = 51;
 
-	//private static Timer timer = new Timer();
 	static Socket clientSocket;
 	static DataOutputStream outToServer;
 	static InputStream in;
@@ -61,8 +63,7 @@ public class TCPClient {
 	public static boolean isSendDataEnabled = false;
 	
 	public static boolean buildServerConnection()  {
-		
-				//return false;
+			
 			try {
 				clientSocket = new Socket("10.0.1.1", 7000);
 	//			clientSocket = new Socket("192.168.1.12", 7000);
@@ -72,9 +73,9 @@ public class TCPClient {
 				in = clientSocket.getInputStream();
 			} catch (IOException e) {
 				
-				//JOptionPane.showMessageDialog(null , "Not Connected!");
+				
 				System.out.println("Connection error. "+e.getMessage());
-				//e.printStackTrace();
+			
 				return false;
 			}
 						dis = new DataInputStream(in);
@@ -83,7 +84,28 @@ public class TCPClient {
 		
 		
 	}
+	public static void sendCapAndFreeze(){
+		System.out.println("send cap & freeze");
+		
+		byte[] paramBuffer = new byte[4];
+		paramBuffer[3] = toByte(HEADER_CAPTURE_AND_FREEZE);
+		paramBuffer[2] = toByte(0);
+		paramBuffer[1] = toByte(0);
+		paramBuffer[0] = toByte(0);
+		sendDataToCamera(paramBuffer);
 
+	}
+	public static void sendResumeCap(){
+		System.out.println("send resume cap");
+		
+		byte[] paramBuffer = new byte[4];
+		paramBuffer[3] = toByte(HEADER_RESUME_CONTINUOUS_CAPTURE);
+		paramBuffer[2] = toByte(0);
+		paramBuffer[1] = toByte(0);
+		paramBuffer[0] = toByte(0);
+		sendDataToCamera(paramBuffer);
+
+	}
 	public static void sendStemLeafTresholds(int param1, int param2, int param3) {
 	
 		byte[] paramBuffer = new byte[4];
@@ -194,6 +216,21 @@ public class TCPClient {
 		
 		byte[] paramBuffer = new byte[4];
 		paramBuffer[3] = toByte(HEADER_FRAME_PERIOD_HARDWARE);
+		paramBuffer[2] = toByte(0);
+		paramBuffer[1] = toByte(0);
+		paramBuffer[0] = toByte(0);
+		
+		recivedData = getDataFromCamera(paramBuffer,4);
+		
+		return  Byte.toUnsignedInt(recivedData[0])+ Byte.toUnsignedInt(recivedData[1])*256+ Byte.toUnsignedInt(recivedData[2])*256*256+ Byte.toUnsignedInt(recivedData[3])*256*256*256;
+
+	}
+	public static int getIsDone(){
+		
+		byte[] recivedData;
+		
+		byte[] paramBuffer = new byte[4];
+		paramBuffer[3] = toByte(HEADER_IS_DONE);
 		paramBuffer[2] = toByte(0);
 		paramBuffer[1] = toByte(0);
 		paramBuffer[0] = toByte(0);
@@ -409,23 +446,8 @@ public class TCPClient {
 
 	}
 
-	
-	private static void sendDataToCamera(byte[] paramBuffer){
 		
-//		Thread t = new Thread(new Runnable(){
-//			public void run(){
-				sendDataToCameraThread(paramBuffer);
-//			}
-//    		});
-//		t.start();
-//		try {
-//			Thread.sleep(10);
-//		} catch (InterruptedException e) {
-//			
-//		}
-	}
-	
-	private static void sendDataToCameraThread(byte[] paramBuffer){
+	private static void sendDataToCamera(byte[] paramBuffer){
 		int retryCount = 0;
 		int waitingTime =0;
 		if(!isSendDataEnabled){
@@ -536,15 +558,10 @@ public class TCPClient {
 			return;
 		}
 		WatchdogTimer.reset();
-		// FileHandler.saveAsGIF(1280, 1024, "out.bin");
-//		FileHandler.saveAllAsGif(1280, NUMBER_OF_LINES_PER_FRAME, "testInLeaf");
+
 		
 		byte[] _32bitframe = new byte[4];
 
-//		for (byte b1 : _32bitframe) {
-//			b1 = 0;
-//
-//		}
 
 		int frameByteCount = 0;
  		int bytesRecived = 0;
@@ -660,10 +677,6 @@ public class TCPClient {
 
 		byte[] _32bitframe = new byte[4];
 
-//		for (byte b1 : _32bitframe) {
-//			b1 = 0;
-//
-//		}
 		int numberOfFrames= 0;
 		int frameByteCount = 0;
  		int bytesRecived = 0;
@@ -785,19 +798,33 @@ public class TCPClient {
 		if(frameCount>0) {
 			PrintWriter writer;
 			try {
-				writer = new PrintWriter(Constants.SNAPSHOT_SAVE_FOLDER+"/details.txt", "UTF-8");
-				writer.println("Number of frames:\t"+frameCount);
-				writer.println("BG threshold:\t"+settingsManager.getBgThrshold());
-				writer.println("S/L threshold:\t"+settingsManager.getStemLeafThreshold());
-				writer.println("Certainty:\t"+settingsManager.getCertantity());
-				writer.println("Min Count:\t"+settingsManager.getMinStemCount());
-				writer.println("Width:\t"+settingsManager.getFrameWidth());
-				writer.println("Height:\t"+settingsManager.getFrameHeight());
-				writer.println("\nMargins");
+				writer = new PrintWriter(Constants.SNAPSHOT_SAVE_FOLDER+"/settings.dat", "UTF-8");
+				writer.print(settingsManager.getFrameHeight()+","+settingsManager.getFrameWidth()+","+frameCount);
+				//writer.println(frameCount);
+				//writer.println("BG threshold:\t"+settingsManager.getBgThrshold());
+				//writer.println("S/L threshold:\t"+settingsManager.getStemLeafThreshold());
+				//writer.println("Certainty:\t"+settingsManager.getCertantity());
+				//writer.println("Min Count:\t"+settingsManager.getMinStemCount());
+				//writer.println("Width:\t"+);
+				
+			//	writer.println("\nMargins");
 				int[] marginArray = settingsManager.getMarginsArray();
 				for(int i=0;i<Constants.NUMBER_OF_MARGINS;i++) {
-					writer.println(i+":\t"+marginArray[i]);
+					writer.print(","+marginArray[i]);
 				}
+				writer.print(","+settingsManager.getBgThrshold()+","+settingsManager.getStemLeafThreshold()+","+settingsManager.getMinStemCount()+","+settingsManager.getCertantity());
+//				writer.println("Number of frames:\t"+frameCount);
+//				writer.println("BG threshold:\t"+settingsManager.getBgThrshold());
+//				writer.println("S/L threshold:\t"+settingsManager.getStemLeafThreshold());
+//				writer.println("Certainty:\t"+settingsManager.getCertantity());
+//				writer.println("Min Count:\t"+settingsManager.getMinStemCount());
+//				writer.println("Width:\t"+settingsManager.getFrameWidth());
+//				writer.println("Height:\t"+settingsManager.getFrameHeight());
+//				writer.println("\nMargins");
+//				int[] marginArray = settingsManager.getMarginsArray();
+//				for(int i=0;i<Constants.NUMBER_OF_MARGINS;i++) {
+//					writer.println(i+":\t"+marginArray[i]);
+//				}
 				writer.close();
 				System.out.println("detail file write successful! ");
 			} catch (FileNotFoundException e) {

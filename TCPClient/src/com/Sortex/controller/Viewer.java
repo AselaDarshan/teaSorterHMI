@@ -28,7 +28,7 @@ public class Viewer {
 	private  JLabel label;
 
 	public  void initialize() {
-
+		frame = new JFrame();
 		frame.getContentPane().setLayout(new FlowLayout());
 		frame.setLocation(350, 310);
 
@@ -102,5 +102,6 @@ public class Viewer {
 	}
 	public void close() {
 		frame.dispose();
+		
 	}
 }

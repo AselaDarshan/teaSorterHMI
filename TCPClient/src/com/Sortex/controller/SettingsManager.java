@@ -24,6 +24,7 @@ public class SettingsManager {
 	private int ejectorOndelaySteps;
 	private int mux;
 	
+	
 	private int exposureTime;
 	private int frameLength;
 	
@@ -33,6 +34,7 @@ public class SettingsManager {
 	private int frameHeight;
 	
 	private int tcpTimeOut;
+	private int captureLimit;
 	
 	public SettingsManager(){
 		
@@ -54,6 +56,8 @@ public class SettingsManager {
 		marginsArray =  new int[25];
 		marginsArray[0] = 590;
 		marginsArray[1] = 690;
+		
+		setCaptureLimit(-1);
 		
 		setTcpTimeOut(1000);
 	}
@@ -354,6 +358,12 @@ public class SettingsManager {
 
 	public void setTcpTimeOut(int tcpTimeOut) {
 		this.tcpTimeOut = tcpTimeOut;
+	}
+	public int getCaptureLimit() {
+		return captureLimit;
+	}
+	public void setCaptureLimit(int captureLimit) {
+		this.captureLimit = captureLimit;
 	}
 	 
 	
