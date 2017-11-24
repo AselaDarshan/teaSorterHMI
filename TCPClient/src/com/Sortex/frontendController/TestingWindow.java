@@ -106,11 +106,11 @@ public class TestingWindow {
 				ejectorTestEnabled = true;
 				Thread thread2 = new Thread() {
 					public void run() {
-						for(int i=1 ; i<24 && ejectorTestEnabled;i++) {
+						for(int i=1 ; i<=24 && ejectorTestEnabled;i++) {
 							System.out.println("ejector "+i+" ON");
 							TCPClient.sendSwitchEjectorCommand(i, 1);
 							try {
-								Thread.sleep((long) ejectorAuotTestSpinner.getValue());
+								Thread.sleep(new Long((int)ejectorAuotTestSpinner.getValue()).longValue());
 							} catch (InterruptedException e1) {
 								
 							}
