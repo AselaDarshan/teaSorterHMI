@@ -19,6 +19,7 @@ import javax.swing.event.ChangeListener;
 
 import com.Sortex.controller.Constants;
 import com.Sortex.controller.SettingsManager;
+import com.Sortex.controller.TCPClient;
 
 public class Window1 {
 
@@ -30,10 +31,12 @@ public class Window1 {
 	JPanel container;
 	JButton backButton;
 	Window3 window3;
+	TestingWindow testingWindow;
 	JPanel panel4;
 	JTabbedPane jtp;
 	int selectedIndex = 0;
 	JPanel mainPanel;
+	private JPanel testingTab;
 
 	public void init() {
 		mainPanel = new JPanel();
@@ -51,6 +54,8 @@ public class Window1 {
 		panel3 = new JPanel();
 		panel3.setBackground(Color.cyan);
 		window3 = new Window3();
+		
+		testingWindow = new TestingWindow();
 	}
 
 	public static void main(String[] args) {
@@ -82,18 +87,33 @@ public class Window1 {
 		SettingsManager settingsManger = new SettingsManager();
 		panel4 = window3.createTestPanel(settingsManger);
 		
+		testingTab = testingWindow.init();
+		
 		
 		frame.setSize(800, 480);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		jtp.addTab("Settings", panel4);
 		jtp.addTab("Status", panel2);
+		jtp.addTab("Test", testingTab);
 		frame.setVisible(true);
 		jtp.addChangeListener(new ChangeListener() {
+
+			private boolean ejectorModeOn;
 
 			@Override
 			public void stateChanged(ChangeEvent e) {
 				selectedIndex = jtp.getSelectedIndex();
-			//	System.out.println("You are in tab : " + selectedIndex);
+				System.out.println("You are in tab : " + selectedIndex);
+				if(selectedIndex == 2) {
+					System.out.println("ejector mode: on");
+					ejectorModeOn = true;
+					TCPClient.sendEjectorMode(1);
+				}
+				else if(ejectorModeOn) {
+					ejectorModeOn = false;
+					System.out.println("ejector mode: off");
+					TCPClient.sendEjectorMode(0);
+				}
 
 				
 			

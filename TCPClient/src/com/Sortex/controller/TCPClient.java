@@ -48,6 +48,10 @@ public class TCPClient {
 	
 	final static int HEADER_GET_REG_VALUE = 50;
 	final static int HEADER_SET_REG_VALUE = 51;
+	final static int HEADER_SWITCH_EJECTOR = 0x3D;
+
+	final static int HEADER_PS_EJECTOR_MODE = 0x3C;
+
 
 	static Socket clientSocket;
 	static DataOutputStream outToServer;
@@ -84,6 +88,31 @@ public class TCPClient {
 		
 		
 	}
+	
+	public static void sendEjectorMode(int mode){
+		System.out.println("send switch ejector command");
+		
+		byte[] paramBuffer = new byte[4];
+		paramBuffer[3] = toByte(HEADER_PS_EJECTOR_MODE);
+		paramBuffer[2] = toByte(0);
+		paramBuffer[1] = toByte(0);
+		paramBuffer[0] = toByte(mode);
+		sendDataToCamera(paramBuffer);
+
+	}
+	
+	public static void sendSwitchEjectorCommand(int ejctor,int state){
+		System.out.println("send switch ejector command");
+		
+		byte[] paramBuffer = new byte[4];
+		paramBuffer[3] = toByte(HEADER_SWITCH_EJECTOR);
+		paramBuffer[2] = toByte(ejctor);
+		paramBuffer[1] = toByte(state);
+		paramBuffer[0] = toByte(0);
+		sendDataToCamera(paramBuffer);
+
+	}
+	
 	public static void sendCapAndFreeze(){
 		System.out.println("send cap & freeze");
 		
@@ -767,7 +796,7 @@ public class TCPClient {
 					}
 				}
 			}
-
+			numberOfFrames++; 
 			//view frame
 
 			if(frameCount>0) {
@@ -776,7 +805,7 @@ public class TCPClient {
 			else {
 				viewer.convertToRGB8andView(byteBuf, width, height);
 			}
-			numberOfFrames++;
+			
 			
 			if(numberOfFrames == frameCount) {
 				break;
