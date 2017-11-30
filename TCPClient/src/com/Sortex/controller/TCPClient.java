@@ -745,6 +745,8 @@ public class TCPClient {
 		tcpReceive = true;
 		
 		buildServerConnection();
+		
+		int timeout = 1000;
 		// get frames
 		while(tcpReceive) {
 			
@@ -775,9 +777,22 @@ public class TCPClient {
 					bytefPerNextPacket = PACKET_SIZE_IN_BYTES;
 				}
 				while (bytesRecived < bytefPerNextPacket) {
-
+					int waitingTime = 0;
 					try{
-						bytesRead = dis.read(byteBuf, frameByteCount,bytefPerNextPacket-bytesRecived);
+						while(waitingTime>timeout) {
+							if(dis.available()>=bytefPerNextPacket-bytesRecived) {
+								bytesRead = dis.read(byteBuf, frameByteCount,bytefPerNextPacket-bytesRecived);
+								break;
+							}
+							try {
+								Thread.sleep(40);
+								waitingTime += 40;
+							} 
+							catch (InterruptedException e) {	
+								System.out.println("WaitingInterruptedException");
+							}
+						}
+						
 					}
 					catch(java.lang.ArrayIndexOutOfBoundsException e){
 						System.out.println("read error: "+bytesRead );
