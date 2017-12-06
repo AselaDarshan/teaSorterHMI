@@ -51,6 +51,7 @@ public class TCPClient {
 	final static int HEADER_SWITCH_EJECTOR = 0x3D;
 
 	final static int HEADER_PS_EJECTOR_MODE = 0x3C;
+	final static int HEADER_GET_DECISION = 65;
 
 
 	static Socket clientSocket;
@@ -65,6 +66,7 @@ public class TCPClient {
 	static boolean retryingCancelled = false;
 	public static boolean tcpReceive;
 	public static boolean isSendDataEnabled = false;
+	private static boolean connectionDisabled = false;
 	
 	public static boolean buildServerConnection()  {
 			
@@ -373,7 +375,19 @@ public class TCPClient {
 		return  Byte.toUnsignedInt(recivedData[0])+ Byte.toUnsignedInt(recivedData[1])*256+ Byte.toUnsignedInt(recivedData[2])*256*256;
 
 	}
-	
+	public static byte[] getDecision(){
+		byte[] recivedData;
+		byte[] paramBuffer = new byte[4];
+		paramBuffer[3] = toByte(HEADER_GET_DECISION );
+		paramBuffer[2] = toByte(0);
+		paramBuffer[1] = toByte(0);
+		paramBuffer[0] = toByte(0);
+		
+		recivedData = getDataFromCamera(paramBuffer,8);
+		
+		return  recivedData;
+
+	}
 	public static void sendBackgroundColorParameters(int _R, int _G, int _B)   {
 		System.out.println("send bg threshold: "+_R);
 	
@@ -485,6 +499,10 @@ public class TCPClient {
 		}
 		do{
 			System.out.print("sending "+paramBuffer.length+" bytes:");
+			if(connectionDisabled ) {
+				System.out.println("connection disabled");
+				return;
+			}
 			for(int i=0;i<paramBuffer.length;i++) {
 				System.out.print(" "+Byte.toUnsignedInt(paramBuffer[i]));
 			}
@@ -545,8 +563,13 @@ public class TCPClient {
 	}
 	
 	private static byte[] getDataFromCamera(byte[] paramBuffer,int numberOfBytes){
+		
 		byte[] recivedData= new byte[numberOfBytes];
 		System.out.println("sending 4 bytes:"+paramBuffer[3]+paramBuffer[2]+paramBuffer[1]+paramBuffer[0]);
+		if(connectionDisabled) {
+			System.out.println("connection disabled");
+			return recivedData;
+		}
 		if(buildServerConnection()){
 			try {
 				outToServer.write(paramBuffer);
@@ -746,6 +769,12 @@ public class TCPClient {
 		
 		buildServerConnection();
 		
+		int prevDecision=0,decision=0;
+		try {
+			PrintWriter decisionWriter = new PrintWriter("decision_log.txt", "UTF-8");
+		
+		
+		
 		int timeout = 1000;
 		// get frames
 		while(tcpReceive) {
@@ -779,25 +808,25 @@ public class TCPClient {
 				while (bytesRecived < bytefPerNextPacket) {
 					int waitingTime = 0;
 					try{
-						while(waitingTime>timeout) {
-							if(dis.available()>=bytefPerNextPacket-bytesRecived) {
+						//while(waitingTime>timeout) {
+						//	if(dis.available()>=bytefPerNextPacket-bytesRecived) {
 								bytesRead = dis.read(byteBuf, frameByteCount,bytefPerNextPacket-bytesRecived);
-								break;
-							}
-							try {
-								Thread.sleep(40);
-								waitingTime += 40;
-							} 
-							catch (InterruptedException e) {	
-								System.out.println("WaitingInterruptedException");
-							}
-						}
+					//			break;
+					//		}
+					//		try {
+					//			Thread.sleep(40);
+					//			waitingTime += 40;
+					//		} 
+					//		catch (InterruptedException e) {	
+					//			System.out.println("WaitingInterruptedException");
+					//		}
+					//	}
 						
 					}
 					catch(java.lang.ArrayIndexOutOfBoundsException e){
 						System.out.println("read error: "+bytesRead );
 					} catch (IOException x) {
-						System.out.println("IOException at tco read");
+						System.out.println("IOException at tcp read");
 					}
 
 					bytesRecived += bytesRead;
@@ -812,12 +841,24 @@ public class TCPClient {
 				}
 			}
 			numberOfFrames++; 
-			//view frame
-
+			
+			decision = Byte.toUnsignedInt(byteBuf[bytesPerFrame-4]) + Byte.toUnsignedInt(byteBuf[bytesPerFrame-3])*256+ Byte.toUnsignedInt(byteBuf[bytesPerFrame-2])*256*256;
+			if(decision!=prevDecision) {
+				prevDecision = decision;
+				
+				decisionWriter.println(Integer.toBinaryString(decision));
+				
+			
+			}
+			
+			
 			if(frameCount>0) {
+				//write frame
 				FileHandler.writeFile(byteBuf, new String(""+numberOfFrames),Constants.SNAPSHOT_SAVE_FOLDER);
+				
 			}
 			else {
+				//view frame
 				viewer.convertToRGB8andView(byteBuf, width, height);
 			}
 			
@@ -881,7 +922,12 @@ public class TCPClient {
 		else {
 		 viewer.close();
 		}
-		
+		decisionWriter.close();
+		} catch (FileNotFoundException | UnsupportedEncodingException e1) {
+			// TODO Auto-generated catch block
+			System.out.println("desicion log file open failed");
+			//e1.printStackTrace();
+		}
 		System.out.println("Realtime frame receiving ended");
 	
 		return returnValue;

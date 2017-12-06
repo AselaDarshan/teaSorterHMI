@@ -32,6 +32,8 @@ public class Window1 {
 	JButton backButton;
 	Window3 window3;
 	TestingWindow testingWindow;
+	DecisionLogWindow decisionLogWindow;
+	JPanel decisionLogPanel;
 	JPanel panel4;
 	JTabbedPane jtp;
 	int selectedIndex = 0;
@@ -56,6 +58,7 @@ public class Window1 {
 		window3 = new Window3();
 		
 		testingWindow = new TestingWindow();
+		decisionLogWindow = new DecisionLogWindow();
 	}
 
 	public static void main(String[] args) {
@@ -88,13 +91,14 @@ public class Window1 {
 		panel4 = window3.createTestPanel(settingsManger);
 		
 		testingTab = testingWindow.init();
-		
+		decisionLogPanel = decisionLogWindow.init();
 		
 		frame.setSize(800, 480);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		jtp.addTab("Settings", panel4);
 		jtp.addTab("Status", panel2);
 		jtp.addTab("Test", testingTab);
+		jtp.addTab("Decision Log", decisionLogPanel);
 		frame.setVisible(true);
 		jtp.addChangeListener(new ChangeListener() {
 
