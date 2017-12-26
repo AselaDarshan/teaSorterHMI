@@ -11,15 +11,16 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
+import java.util.concurrent.locks.LockSupport;
 
 import javax.swing.JButton;
-import javax.swing.JLabel;
+
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JSpinner;
+
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
-import javax.swing.SpinnerNumberModel;
+
 import javax.swing.border.TitledBorder;
 import javax.swing.text.DefaultCaret;
 
@@ -38,8 +39,7 @@ public class DecisionLogWindow {
 	JTextField resetLengthText;
 	JTextField exposureText ;
 	Thread updaterThread = null;
-	private JTextField regValueText;
-	private JSpinner regAddrSpinner;
+
 	boolean regEditEnabled = false;
 	private boolean getUpdates;
 	JTextArea logText ;
@@ -92,7 +92,7 @@ public class DecisionLogWindow {
 		/**********************
 		 * empty panel
 		 **************************************************/
-		JPanel emptyPanel = new JPanel(new GridBagLayout());
+		
 		
 		container.add(decisionLogPanel, new GridBagConstraints(0,0 , 1, 1, 1, 0.3, GridBagConstraints.WEST, GridBagConstraints.BOTH,
 				new Insets(2, 2, 2, 2), 0, 0));
@@ -144,25 +144,25 @@ public class DecisionLogWindow {
 
 	private Thread getUpdaterThread(){
 		return new Thread() {
-			int decision=0,preDecision = 0,frameIndex,prvFrameIndex;
+			int decision=0,preDecision = 0,frameIndex;
 			byte[] decisionData;
 			public void run() {
 				try {
 				Thread.sleep(40);
 				while(getUpdates) {
-					
-						
-						Thread.sleep(1);
+					LockSupport.parkNanos(400000);
+					//logText.append("\nMissed "+(frameIndex-prvFrameIndex-1 )+ "frames from"+prvFrameIndex);
+						//Thread.sleep(1);
 						decisionData = TCPClient.getDecision();
-						decision = Byte.toUnsignedInt(decisionData[0])+ Byte.toUnsignedInt(decisionData[1])*256+ Byte.toUnsignedInt(decisionData[2])*256*256;
-						frameIndex =  Byte.toUnsignedInt(decisionData[4])+ Byte.toUnsignedInt(decisionData[5])*256+ Byte.toUnsignedInt(decisionData[6])*256*256+ Byte.toUnsignedInt(decisionData[7])*256*256*256;
-						if(prvFrameIndex + 1 < frameIndex) {
-							logText.append("Missed "+(frameIndex-prvFrameIndex-1 )+ "frames from"+prvFrameIndex);
-						}
-						prvFrameIndex  = frameIndex;
+						frameIndex  = Byte.toUnsignedInt(decisionData[0])+ Byte.toUnsignedInt(decisionData[1])*256+ Byte.toUnsignedInt(decisionData[2])*256*256 + Byte.toUnsignedInt(decisionData[3])*256*256*256;
+						decision =  Byte.toUnsignedInt(decisionData[4])+ Byte.toUnsignedInt(decisionData[5])*256+ Byte.toUnsignedInt(decisionData[6])*256*256+ Byte.toUnsignedInt(decisionData[7])*256*256*256;
+//						if(prvFrameIndex + 1 < frameIndex) {
+//							logText.append("Missed "+(frameIndex-prvFrameIndex-1 )+ "frames from"+prvFrameIndex);
+//						}
+					//	prvFrameIndex  = frameIndex;
 						if(decision != preDecision) {
 							preDecision = decision;
-							logText.append(frameIndex+" "+decision+"\n");
+							logText.append(frameIndex+" "+Integer.toBinaryString(decision)+"\n");
 						}
 						
 						

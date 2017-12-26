@@ -9,8 +9,7 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
+
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -18,7 +17,7 @@ import javax.swing.JPanel;
 
 import javax.swing.JSpinner;
 import javax.swing.JTextField;
-import javax.swing.SpinnerNumberModel;
+
 import javax.swing.border.TitledBorder;
 
 import com.Sortex.controller.Constants;
@@ -34,11 +33,9 @@ public class TestingWindow {
 	
 	JTextField resetLengthText;
 	JTextField exposureText ;
-	
-	private JTextField regValueText;
-	private JSpinner regAddrSpinner;
+
 	boolean regEditEnabled = false;
-	private boolean getUpdates;
+	
 	
 	private boolean ejectorTestEnabled;
 	public JPanel init() {

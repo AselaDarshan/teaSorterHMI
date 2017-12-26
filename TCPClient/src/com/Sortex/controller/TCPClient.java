@@ -68,6 +68,8 @@ public class TCPClient {
 	public static boolean isSendDataEnabled = false;
 	private static boolean connectionDisabled = false;
 	
+	static Viewer viewer = null;
+	
 	public static boolean buildServerConnection()  {
 			
 			try {
@@ -601,124 +603,7 @@ public class TCPClient {
 		return (byte) ((tmp & 0x80) == 0 ? tmp : tmp - 256);
 	}
 	
-	
 
-	public static void getFrames(String folderName,int timeout, int numberOfFrames,boolean filesave) throws IOException   {
-		
-		if(!isSendDataEnabled){
-			System.out.println("communication is disabled");
-			return;
-		}
-		WatchdogTimer.reset();
-
-		
-		byte[] _32bitframe = new byte[4];
-
-
-		int frameByteCount = 0;
- 		int bytesRecived = 0;
-		int bytesRead = 0;
-		long startTime = System.nanoTime();
-		
-		SettingsManager settingsManager =  new SettingsManager();
-		settingsManager.retriveSettingsFromCamera();
-		
-		int width = settingsManager.getFrameWidth();
-		int height =  settingsManager.getFrameHeight();
-		int bytesPerFrame = width*height*Constants.PIXEL_SIZE_IN_BYTES;
-		
-		int bytesPerPacket;
-		if(bytesPerFrame>Constants.MAX_BYTES_IN_PACKET){
-			bytesPerPacket = Constants.MAX_BYTES_IN_PACKET;
-		}
-		else{
-			bytesPerPacket = bytesPerFrame;
-		}
-		
-		System.out.println("requesting frames. width:"+width+" height:"+height+" bytesPerFrame "+bytesPerFrame+" bytesPerPacket:"+bytesPerPacket);
-		byte[] byteBuf = new byte[bytesPerFrame];
-		
-		FrameBuffer.clearBuffer();
-		// ... the code being measured ...
-
-		Controller.start(numberOfFrames, folderName,width,height,filesave);
-		Thread.currentThread().setPriority(Thread.MAX_PRIORITY);
-		tcpReceive = true;
-		
-		buildServerConnection();
-		// get frames
-		for (int i = 0; (i < numberOfFrames||numberOfFrames==-1)&&tcpReceive; i++) {
-			WatchdogTimer.reset();
-			// long start = System.nanoTime();
-			frameByteCount = 0;
-			bytesRecived = 0;
-			bytesRead = 0;
-
-			int bytefPerNextPacket;
-			// get single frame
-			while (frameByteCount <bytesPerFrame) {
-				try{
-				outToServer.write(_32bitframe);
-				}
-				catch(java.net.SocketException ex){
-					//if connection is closed try again
-					try {
-						Thread.sleep(500);
-					} catch (InterruptedException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-					getFrames(folderName,timeout,numberOfFrames,filesave);
-					return;
-				}
-				// frameNumber = dis.readInt();
-
-				bytesRecived = 0;
-				// get single packet
-				if(bytesPerFrame-frameByteCount<PACKET_SIZE_IN_BYTES){
-					bytefPerNextPacket = bytesPerFrame-frameByteCount;
-				}
-				else{
-					bytefPerNextPacket = PACKET_SIZE_IN_BYTES;
-				}
-				while (bytesRecived < bytefPerNextPacket) {
-
-					try{
-						bytesRead = dis.read(byteBuf, frameByteCount,bytefPerNextPacket-bytesRecived);
-					}
-					catch(java.lang.ArrayIndexOutOfBoundsException e){
-						System.out.println("read error: "+bytesRead );
-					}
-
-					bytesRecived += bytesRead;
-					frameByteCount += bytesRead;
-				
-					try {
-						Thread.sleep(40);
-					} catch (InterruptedException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-
-				}
-
-			}
-//			System.out.println("pc: "+Byte.toUnsignedInt(byteBuf[bytesPerFrame-4])+" "+Byte.t oUnsignedInt(byteBuf[bytesPerFrame-3])+" "+Byte.toUnsignedInt(byteBuf[bytesPerFrame-2])+" "+Byte.toUnsignedInt(byteBuf[bytesPerFrame-1]));
-			FrameBuffer.addToBuffer(byteBuf);
-
-		}
-
-		long estimatedTime = System.nanoTime() - startTime;
-
-		System.out.println("frame received,fps:" + numberOfFrames / (estimatedTime / 1000000000.0) + " time: "
-				+ estimatedTime / 1000000 + "ms");
-
-		//FileHandler.saveAllAsGif(1280, NUMBER_OF_LINES_PER_FRAME, folderName);
-		clientSocket.close();
-
-		System.out.println("Capturing ended");
-		status = true;
-	}
 	
 	public static int getFramesRealTime(int frameCount,SettingsManager settingsManager) {
 		
@@ -755,7 +640,7 @@ public class TCPClient {
 
 		byte[] byteBuf = new byte[bytesPerFrame];
 		
-		Viewer viewer = null;
+		
 		if(frameCount>0) {
 			
 		}
@@ -773,16 +658,22 @@ public class TCPClient {
 		try {
 			PrintWriter decisionWriter = new PrintWriter("decision_log.txt", "UTF-8");
 		
-		
-		
-		int timeout = 1000;
+		try {
+			clientSocket.setSoTimeout(Constants.READ_TIMEOUT_MILIS);
+		} catch (SocketException e1) {
+			System.out.println("SocketException while setting timeout");
+			returnValue =  -1;
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+	
 		// get frames
 		while(tcpReceive) {
 			
 			frameByteCount = 0;
 			bytesRecived = 0;
 			bytesRead = 0;
-
+			System.out.println("receiving frame "+numberOfFrames);
 			int bytefPerNextPacket;
 			// get single frame
 			while (frameByteCount <bytesPerFrame) {
@@ -806,34 +697,23 @@ public class TCPClient {
 					bytefPerNextPacket = PACKET_SIZE_IN_BYTES;
 				}
 				while (bytesRecived < bytefPerNextPacket) {
-					int waitingTime = 0;
-					try{
-						//while(waitingTime>timeout) {
-						//	if(dis.available()>=bytefPerNextPacket-bytesRecived) {
-								bytesRead = dis.read(byteBuf, frameByteCount,bytefPerNextPacket-bytesRecived);
-					//			break;
-					//		}
-					//		try {
-					//			Thread.sleep(40);
-					//			waitingTime += 40;
-					//		} 
-					//		catch (InterruptedException e) {	
-					//			System.out.println("WaitingInterruptedException");
-					//		}
-					//	}
+						
+					try {
+						bytesRead = dis.read(byteBuf, frameByteCount,bytefPerNextPacket-bytesRecived);
+						System.out.println("received "+bytesRead+" bytes");
+					} catch (IOException e1) {
+						System.out.println("read timeout after "+Constants.READ_TIMEOUT_MILIS);
+						returnValue =  -1;
+						e1.printStackTrace();
+						break;
 						
 					}
-					catch(java.lang.ArrayIndexOutOfBoundsException e){
-						System.out.println("read error: "+bytesRead );
-					} catch (IOException x) {
-						System.out.println("IOException at tcp read");
-					}
-
+					
 					bytesRecived += bytesRead;
 					frameByteCount += bytesRead;
 				
 					try {
-						Thread.sleep(40);
+						Thread.sleep(Constants.PACKET_DELAY_IN_MILIS);
 					} 
 					catch (InterruptedException e) {	
 						System.out.println("InterruptedException");
@@ -847,10 +727,8 @@ public class TCPClient {
 				prevDecision = decision;
 				
 				decisionWriter.println(Integer.toBinaryString(decision));
-				
 			
 			}
-			
 			
 			if(frameCount>0) {
 				//write frame
@@ -885,31 +763,13 @@ public class TCPClient {
 			try {
 				writer = new PrintWriter(Constants.SNAPSHOT_SAVE_FOLDER+"/settings.dat", "UTF-8");
 				writer.print(settingsManager.getFrameHeight()+","+settingsManager.getFrameWidth()+","+frameCount);
-				//writer.println(frameCount);
-				//writer.println("BG threshold:\t"+settingsManager.getBgThrshold());
-				//writer.println("S/L threshold:\t"+settingsManager.getStemLeafThreshold());
-				//writer.println("Certainty:\t"+settingsManager.getCertantity());
-				//writer.println("Min Count:\t"+settingsManager.getMinStemCount());
-				//writer.println("Width:\t"+);
 				
-			//	writer.println("\nMargins");
 				int[] marginArray = settingsManager.getMarginsArray();
 				for(int i=0;i<Constants.NUMBER_OF_MARGINS;i++) {
 					writer.print(","+marginArray[i]);
 				}
 				writer.print(","+settingsManager.getBgThrshold()+","+settingsManager.getStemLeafThreshold()+","+settingsManager.getMinStemCount()+","+settingsManager.getCertantity());
-//				writer.println("Number of frames:\t"+frameCount);
-//				writer.println("BG threshold:\t"+settingsManager.getBgThrshold());
-//				writer.println("S/L threshold:\t"+settingsManager.getStemLeafThreshold());
-//				writer.println("Certainty:\t"+settingsManager.getCertantity());
-//				writer.println("Min Count:\t"+settingsManager.getMinStemCount());
-//				writer.println("Width:\t"+settingsManager.getFrameWidth());
-//				writer.println("Height:\t"+settingsManager.getFrameHeight());
-//				writer.println("\nMargins");
-//				int[] marginArray = settingsManager.getMarginsArray();
-//				for(int i=0;i<Constants.NUMBER_OF_MARGINS;i++) {
-//					writer.println(i+":\t"+marginArray[i]);
-//				}
+
 				writer.close();
 				System.out.println("detail file write successful! ");
 			} catch (FileNotFoundException e) {
@@ -921,17 +781,23 @@ public class TCPClient {
 		}
 		else {
 		 viewer.close();
+		 System.out.println("Closing view");
 		}
 		decisionWriter.close();
 		} catch (FileNotFoundException | UnsupportedEncodingException e1) {
-			// TODO Auto-generated catch block
+			
 			System.out.println("desicion log file open failed");
-			//e1.printStackTrace();
-		}
+			
+		} 
 		System.out.println("Realtime frame receiving ended");
 	
 		return returnValue;
 	}
 	
-	
+	public static void closeView() {
+		if(viewer != null) {
+			viewer.close();
+		}
+		tcpReceive = false;
+	}
 }

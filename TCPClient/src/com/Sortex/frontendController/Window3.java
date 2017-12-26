@@ -3,7 +3,7 @@ package com.Sortex.frontendController;
 import java.awt.BorderLayout;
 
 import java.awt.Color;
-import java.awt.Container;
+
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
@@ -14,8 +14,7 @@ import java.awt.Insets;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
+
 import java.io.BufferedReader;
 import java.io.File;
 
@@ -43,7 +42,7 @@ import javax.swing.JSpinner;
 import javax.swing.JTextField;
 
 import javax.swing.SpinnerNumberModel;
-import javax.swing.WindowConstants;
+
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -453,14 +452,19 @@ public class Window3 {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-			
-				int[] marginsArray = new AutoCalibration().detectMarginsInBlackWhiteStrips(tcpTimeout);
-				settingsManager.setMarginsArray(marginsArray);
-				for(int i=Constants.NUMBER_OF_MARGINS-1;i>=0;i--){
-			
-					com.Sortex.controller.TCPClient.sendMargin(i,marginsArray[i]);
+				Thread tcpThread = new Thread() {
+					public void run() {
+						int[] marginsArray = new AutoCalibration().detectMarginsInBlackWhiteStrips(tcpTimeout);
+						settingsManager.setMarginsArray(marginsArray);
+						for(int i=Constants.NUMBER_OF_MARGINS-1;i>=0;i--){
 					
-				}
+							com.Sortex.controller.TCPClient.sendMargin(i,marginsArray[i]);
+							
+						}
+					}
+				};
+				tcpThread.start();
+				
 				
 			}
 		});
@@ -662,9 +666,27 @@ public class Window3 {
 
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
+				System.out.println("applying...");
+				JOptionPane pane = new JOptionPane("", JOptionPane.INFORMATION_MESSAGE, JOptionPane.DEFAULT_OPTION, null, new Object[]{}, null);
+				final JDialog dialog = pane.createDialog("Applying");
+				pane.setMessage("Please wait..");
+				
+				
+				
+				
+				new Thread() {
+					public void run() {
+						settingsManager.applySettings();
+						dialog.setVisible(false);
+		                dialog.dispose();
 
-				settingsManager.applySettings();
-
+					}
+						
+				
+			}.start();
+			dialog.setVisible(true);
+		
+				
 			}
 		});
 		
@@ -835,13 +857,13 @@ public class Window3 {
 				
 				if(thread2!=null){
 					TCPClient.tcpReceive = false;
-//					thread2.interrupt();
+					//thread2.interrupt();
 				}
 				
 				thread2 = new Thread() {
 					public void run() {
 						if(isMonitoring) {
-							TCPClient.tcpReceive = false;
+							TCPClient.closeView();
 							isMonitoring = false;
 						}else {
 							isMonitoring = true;
