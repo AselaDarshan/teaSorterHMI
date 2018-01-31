@@ -33,6 +33,8 @@ public class Window1 {
 	Window3 window3;
 	TestingWindow testingWindow;
 	DecisionLogWindow decisionLogWindow;
+	AdminWindow adminWindow;
+	JPanel adminPanel;
 	JPanel decisionLogPanel;
 	JPanel panel4;
 	JTabbedPane jtp;
@@ -59,6 +61,7 @@ public class Window1 {
 		
 		testingWindow = new TestingWindow();
 		decisionLogWindow = new DecisionLogWindow();
+		adminWindow = new AdminWindow();
 	}
 
 	public static void main(String[] args) {
@@ -92,6 +95,8 @@ public class Window1 {
 		
 		testingTab = testingWindow.init();
 		decisionLogPanel = decisionLogWindow.init();
+		adminPanel = adminWindow.init();
+		
 		
 		frame.setSize(800, 480);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -99,6 +104,7 @@ public class Window1 {
 		jtp.addTab("Status", panel2);
 		jtp.addTab("Test", testingTab);
 		jtp.addTab("Decision Log", decisionLogPanel);
+		jtp.addTab("Admin", adminPanel);
 		frame.setVisible(true);
 		jtp.addChangeListener(new ChangeListener() {
 

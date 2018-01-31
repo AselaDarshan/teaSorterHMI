@@ -48,5 +48,6 @@ public class Constants {
 	
 	public final static int RESPONSE_TIMEOUT_MILIS = 1000;
 	public final static int READ_TIMEOUT_MILIS = 1000;
-	public final static int PACKET_DELAY_IN_MILIS = 60;
+	public final static int PACKET_DELAY_IN_MILIS = 1;
+	public final static int MAX_RETRY_COUNT = 10;
 }

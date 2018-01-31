@@ -9,7 +9,7 @@ import java.net.*;
 
 public class TCPClient {
 	final static int NUMBER_OF_BYTES_PER_PACKET = 40000;//61440
-	final static int PACKET_SIZE_IN_BYTES = 61440;//61440
+	final static int PACKET_SIZE_IN_BYTES = 1000;//61440
 	final static int NUMBER_OF_BYTES_PER_LINE = 100*4;// 6 bytes
 	final static int NUMBER_OF_LINES_PER_FRAME = 100;
 	final static int NUMBER_OF_BYTES_PER_FRAME = NUMBER_OF_BYTES_PER_LINE * NUMBER_OF_LINES_PER_FRAME;
@@ -377,6 +377,22 @@ public class TCPClient {
 		return  Byte.toUnsignedInt(recivedData[0])+ Byte.toUnsignedInt(recivedData[1])*256+ Byte.toUnsignedInt(recivedData[2])*256*256;
 
 	}
+	
+	public static  int sendRawCommand(int command){
+		byte[] recivedData;
+		byte[] paramBuffer = new byte[4];
+		
+		paramBuffer[0] = toByte(command%256);
+		paramBuffer[1] = toByte(command%(256*256)/256);
+		paramBuffer[2] = toByte(command%(256*256*256)/(256*256));
+		paramBuffer[3] = toByte(command/(256*256*256));
+		
+		recivedData = getDataFromCamera(paramBuffer,4);
+		
+		return  Byte.toUnsignedInt(recivedData[0])+ Byte.toUnsignedInt(recivedData[1])*256+ Byte.toUnsignedInt(recivedData[2])*256*256+Byte.toUnsignedInt(recivedData[3])*256*256*256;
+
+	}
+	
 	public static byte[] getDecision(){
 		byte[] recivedData;
 		byte[] paramBuffer = new byte[4];
@@ -598,6 +614,8 @@ public class TCPClient {
 		return null;
 	}
 	
+	
+	
 	public static byte toByte(int number) {
 		int tmp = number & 0xff;
 		return (byte) ((tmp & 0x80) == 0 ? tmp : tmp - 256);
@@ -663,31 +681,26 @@ public class TCPClient {
 		} catch (SocketException e1) {
 			System.out.println("SocketException while setting timeout");
 			returnValue =  -1;
+			
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
 	
+		int retryCount = 1;
 		// get frames
+		try{
 		while(tcpReceive) {
 			
 			frameByteCount = 0;
 			bytesRecived = 0;
 			bytesRead = 0;
-			System.out.println("receiving frame "+numberOfFrames);
+			//System.out.println("receiving frame "+numberOfFrames+" attempt "+retryCount);
 			int bytefPerNextPacket;
 			// get single frame
-			while (frameByteCount <bytesPerFrame) {
-				try{
+			while (frameByteCount <bytesPerFrame && tcpReceive) {
+				
 				outToServer.write(_32bitframe);
-				}
-				catch(java.net.SocketException ex){
-					System.out.println("SocketException at tcp write");
-					returnValue =  -1;
-				}
-				catch (IOException e) {
-					System.out.println("IOException at tcp write");
-					returnValue =  -1;
-				}
+				
 				bytesRecived = 0;
 				// get single packet
 				if(bytesPerFrame-frameByteCount<PACKET_SIZE_IN_BYTES){
@@ -700,9 +713,17 @@ public class TCPClient {
 						
 					try {
 						bytesRead = dis.read(byteBuf, frameByteCount,bytefPerNextPacket-bytesRecived);
-						System.out.println("received "+bytesRead+" bytes");
+					//	System.out.println("received "+bytesRead+" bytes");
+						retryCount = 1;
 					} catch (IOException e1) {
+						retryCount++;
+						if(retryCount>Constants.MAX_RETRY_COUNT) {
+							tcpReceive = false;
+							System.out.println("stoped retring after "+Constants.MAX_RETRY_COUNT+" attempts");
+						}
+						else {
 						System.out.println("read timeout after "+Constants.READ_TIMEOUT_MILIS);
+						}
 						returnValue =  -1;
 						e1.printStackTrace();
 						break;
@@ -712,12 +733,12 @@ public class TCPClient {
 					bytesRecived += bytesRead;
 					frameByteCount += bytesRead;
 				
-					try {
-						Thread.sleep(Constants.PACKET_DELAY_IN_MILIS);
-					} 
-					catch (InterruptedException e) {	
-						System.out.println("InterruptedException");
-					}
+//					try {
+//						Thread.sleep(Constants.PACKET_DELAY_IN_MILIS);
+//					} 
+//					catch (InterruptedException e) {	
+//						System.out.println("InterruptedException");
+//					}
 				}
 			}
 			numberOfFrames++; 
@@ -745,7 +766,15 @@ public class TCPClient {
 				break;
 			}
 		}
-
+		}
+		catch(java.net.SocketException ex){
+			System.out.println("SocketException at tcp write");
+			returnValue =  -1;
+		}
+		catch (IOException e) {
+			System.out.println("IOException at tcp write");
+			returnValue =  -1;
+		}
 		long estimatedTime = System.nanoTime() - startTime;
 
 		System.out.println("frame received,fps:" + numberOfFrames / (estimatedTime / 1000000000.0) + " time: "

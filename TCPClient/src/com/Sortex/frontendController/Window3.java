@@ -456,9 +456,12 @@ public class Window3 {
 					public void run() {
 						int[] marginsArray = new AutoCalibration().detectMarginsInBlackWhiteStrips(tcpTimeout);
 						settingsManager.setMarginsArray(marginsArray);
+						marginValueArray = marginsArray;
 						for(int i=Constants.NUMBER_OF_MARGINS-1;i>=0;i--){
 					
 							com.Sortex.controller.TCPClient.sendMargin(i,marginsArray[i]);
+							
+						
 							
 						}
 					}
@@ -774,15 +777,15 @@ public class Window3 {
 			
 		
 		delaySettingPanel.add(delayStepsLabel,new GridBagConstraints(5, 0, 1, 1, 0.05, 0.1,	GridBagConstraints.EAST,	
-				GridBagConstraints.BOTH, new Insets(2, 20, 2, 2), 0, 0));
+				GridBagConstraints.BOTH, new Insets(2, 8, 2, 2), 0, 0));
 		delaySettingPanel.add(delayStepsSpinner,new GridBagConstraints(6, 0, 1, 1, 0.3, 0.1, GridBagConstraints.EAST,	GridBagConstraints.BOTH, new Insets(2, 2, 2, 2), 0, 0));
 		
 		delaySettingPanel.add(ejectDurationLabel,new GridBagConstraints(7, 0, 1, 1, 0.03, 0.1, GridBagConstraints.CENTER,
-				GridBagConstraints.BOTH, new Insets(2, 20, 2, 2), 0, 0));
+				GridBagConstraints.BOTH, new Insets(2, 8, 2, 2), 0, 0));
 		delaySettingPanel.add(ejectDurationSpinner,new GridBagConstraints(8, 0, 1, 1, 0.3, 0.1, GridBagConstraints.EAST,
 				GridBagConstraints.BOTH, new Insets(2, 2, 2, 2), 0, 0));
 		
-		delaySettingPanel.add(delayTextPanel,new GridBagConstraints(9, 0, 1, 1, 0.3, 0.1, GridBagConstraints.EAST,
+		delaySettingPanel.add(delayTextPanel,new GridBagConstraints(9, 0, 1, 1, 1, 0.1, GridBagConstraints.EAST,
 				GridBagConstraints.BOTH, new Insets(2, 2, 2, 2), 0, 0));
 		
 		delayGranulatySpinner.addChangeListener(new ChangeListener() {
